@@ -567,6 +567,56 @@
       color: #6b7280;
     }
 
+    .clickable-cell {
+      cursor: pointer;
+      transition: color 0.12s;
+    }
+    .clickable-cell:hover {
+      color: var(--brand) !important;
+    }
+    .clickable-cell:hover strong {
+      color: var(--brand) !important;
+      text-decoration: underline;
+    }
+
+    .tab-btn {
+      border: 1px solid transparent;
+      background: transparent;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-btn.active {
+      border-color: var(--border) var(--border) transparent var(--border) !important;
+      background: var(--surface) !important;
+      color: var(--brand) !important;
+      border-bottom: 2px solid var(--brand) !important;
+    }
+
+    .distributor-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .distributor-badge .remove-btn {
+      cursor: pointer;
+      font-weight: bold;
+      color: var(--muted);
+      transition: color 0.12s;
+    }
+    .distributor-badge .remove-btn:hover {
+      color: var(--danger);
+    }
+
     /* Datalist helper styling */
     .autocomplete-list {
       max-height: 200px;
@@ -614,17 +664,45 @@
       <!-- Left side: File upload & Supplier Price Input Form -->
       <div style="display: flex; flex-direction: column; gap: var(--space-6);">
         
-        <!-- 1. File upload panel -->
-        <section class="card" aria-labelledby="uploadHeading">
+        <!-- 1. System Setup Card (Upload & Distributors) -->
+        <section class="card" aria-labelledby="setupHeading">
           <div class="card-header">
-            <h2 class="card-title" id="uploadHeading">อัปโหลดรายงานสินค้าใกล้หมด</h2>
-            <p class="card-subtitle">สามารถอัปโหลดไฟล์ใหม่ได้ทุกครั้งเพื่อนำเข้ายอดคงเหลือและข้อมูล Max/Min ล่าสุด</p>
+            <h2 class="card-title" id="setupHeading">ตั้งค่าระบบและรายงาน</h2>
+            <p class="card-subtitle">จัดการไฟล์รายงานสินค้าและรายชื่อผู้จัดจำหน่ายมาตรฐานในระบบ</p>
           </div>
-          <div class="upload-zone" id="uploadZone">
-            <div class="upload-icon">📥</div>
-            <div class="upload-title" id="uploadZoneTitle">ลากไฟล์รายงานที่ต้องการอัปโหลดมาที่นี่ หรือคลิกเพื่อเลือกไฟล์</div>
-            <div class="upload-desc">รองรับไฟล์ Excel (.xlsx) และ CSV (.csv) ตามโครงสร้างรายงานเดิม</div>
-            <input type="file" id="fileInput" accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+
+          <!-- Tabs Navigation -->
+          <div style="display: flex; border-bottom: 1px solid var(--border); margin-bottom: var(--space-4); gap: var(--space-1);">
+            <button type="button" class="tab-btn active" id="tabUploadBtn">
+              📥 นำเข้ารายงานสินค้า
+            </button>
+            <button type="button" class="tab-btn" id="tabDistributorsBtn">
+              🏢 จัดการรายชื่อผู้จัดจำหน่าย
+            </button>
+          </div>
+
+          <!-- Tab Content 1: Upload -->
+          <div id="tabContentUpload">
+            <div class="upload-zone" id="uploadZone">
+              <div class="upload-icon">📥</div>
+              <div class="upload-title" id="uploadZoneTitle">ลากไฟล์รายงานที่ต้องการอัปโหลดมาที่นี่ หรือคลิกเพื่อเลือกไฟล์</div>
+              <div class="upload-desc">รองรับไฟล์ Excel (.xlsx) และ CSV (.csv) ตามโครงสร้างรายงานเดิม</div>
+              <input type="file" id="fileInput" accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+            </div>
+          </div>
+
+          <!-- Tab Content 2: Distributors -->
+          <div id="tabContentDistributors" style="display: none;">
+            <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+              <div style="display: flex; gap: var(--space-2);">
+                <input type="text" id="newDistributorInput" placeholder="กรอกชื่อผู้จัดจำหน่ายรายใหม่ (เช่น SP Drug)...">
+                <button type="button" class="btn btn-primary btn-sm" id="addNewDistributorBtn">➕ เพิ่มรายชื่อ</button>
+              </div>
+              <div class="field-label" style="margin: 0; font-size: 13.5px;">รายชื่อผู้จัดจำหน่ายมาตรฐานในระบบ (คลิก ✕ เพื่อลบ):</div>
+              <div id="distributorsBadgeList" style="display: flex; flex-wrap: wrap; gap: var(--space-2); min-height: 80px; max-height: 150px; overflow-y: auto; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-subtle);">
+                <!-- Dynamic distributor badges -->
+              </div>
+            </div>
           </div>
         </section>
 
@@ -780,18 +858,49 @@
         console.error("Failed parsing base dataset.", e);
       }
 
-      // Active products array
-      let products = initialData.map(p => ({
-        no: Number(p.no) || 0,
-        code: String(p.code || '').trim(),
-        name: String(p.name || '').trim(),
-        max: Number(p.max) || 0,
-        min: Number(p.min) || 0,
-        stock: Number(p.stock) || 0,
-        lastBuy: Number(p.lastBuy) || 0,
-        unit: String(p.unit || '').trim(),
-        orderQty: Math.max(0, (Number(p.max) || 0) - (Number(p.min) || 0))
-      }));
+      // Active products array and Report metadata
+      let products = [];
+      let activeReportName = "รายงานสินค้าใกล้หมด_2026-11-17.xlsx (149 รายการ)";
+
+      // Try loading from localStorage
+      let hasStoredProducts = false;
+      try {
+        const storedProds = localStorage.getItem('pharmacy_active_products_v2');
+        const storedName = localStorage.getItem('pharmacy_report_name_v2');
+        if (storedProds) {
+          products = JSON.parse(storedProds);
+          hasStoredProducts = true;
+          if (storedName) {
+            activeReportName = storedName;
+          }
+        }
+      } catch (e) {
+        console.warn("Failed loading products from localStorage", e);
+      }
+
+      // Fallback if no stored products exist
+      if (!hasStoredProducts) {
+        products = initialData.map(p => ({
+          no: Number(p.no) || 0,
+          code: String(p.code || '').trim(),
+          name: String(p.name || '').trim(),
+          max: Number(p.max) || 0,
+          min: Number(p.min) || 0,
+          stock: Number(p.stock) || 0,
+          lastBuy: Number(p.lastBuy) || 0,
+          unit: String(p.unit || '').trim(),
+          orderQty: Math.max(0, (Number(p.max) || 0) - (Number(p.min) || 0))
+        }));
+      }
+
+      function saveProductsState() {
+        try {
+          localStorage.setItem('pharmacy_active_products_v2', JSON.stringify(products));
+          localStorage.setItem('pharmacy_report_name_v2', activeReportName);
+        } catch (e) {
+          console.warn("Could not write products state to localStorage", e);
+        }
+      }
 
       // Persistent Quote Storage structure: { [productCode]: [ { company: "Company A", price: 10 }, ... ] }
       let supplierQuotesMap = {};
@@ -835,6 +944,15 @@
       const clearOrdersBtn = document.getElementById('clearOrdersBtn');
       const restoreOrdersBtn = document.getElementById('restoreOrdersBtn');
       const tableFileInput = document.getElementById('tableFileInput');
+
+      // Tab elements
+      const tabUploadBtn = document.getElementById('tabUploadBtn');
+      const tabDistributorsBtn = document.getElementById('tabDistributorsBtn');
+      const tabContentUpload = document.getElementById('tabContentUpload');
+      const tabContentDistributors = document.getElementById('tabContentDistributors');
+      const newDistributorInput = document.getElementById('newDistributorInput');
+      const addNewDistributorBtn = document.getElementById('addNewDistributorBtn');
+      const distributorsBadgeList = document.getElementById('distributorsBadgeList');
 
       // Helper Formats
       function formatNumber(n) {
@@ -934,12 +1052,45 @@
         activeEditorSection.style.display = 'block';
       }
 
+      // Distributors list
+      let distributorsList = ['SP Drug', 'DKSH', 'Zuellig Pharma', 'ยี่ปั๊ว A'];
+      try {
+        const savedDists = localStorage.getItem('pharmacy_distributors_v2');
+        if (savedDists) {
+          distributorsList = JSON.parse(savedDists);
+        }
+      } catch (e) {
+        console.warn("Could not read distributors from localStorage", e);
+      }
+
+      function saveDistributorsState() {
+        try {
+          localStorage.setItem('pharmacy_distributors_v2', JSON.stringify(distributorsList));
+        } catch (e) {
+          console.warn("Could not write distributors to localStorage", e);
+        }
+      }
+
+      function getDistributorSelectOptions(selectedCompany = '') {
+        let html = `<option value="">-- เลือกผู้จัดจำหน่าย --</option>`;
+        distributorsList.forEach(d => {
+          const sel = d.toLowerCase().trim() === selectedCompany.toLowerCase().trim() ? 'selected' : '';
+          html += `<option value="${escapeHtml(d)}" ${sel}>${escapeHtml(d)}</option>`;
+        });
+        if (selectedCompany && !distributorsList.some(d => d.toLowerCase().trim() === selectedCompany.toLowerCase().trim())) {
+          html += `<option value="${escapeHtml(selectedCompany)}" selected>${escapeHtml(selectedCompany)} (ไม่อยู่ในรายชื่อมาตรฐาน)</option>`;
+        }
+        return html;
+      }
+
       function addDistributorRow(company = '', price = '') {
         const row = document.createElement('div');
         row.className = 'distributor-row';
         row.innerHTML = `
           <div>
-            <input type="text" class="dist-company" placeholder="ระบุชื่อผู้จัดจำหน่าย (เช่น ดีเคเอสเอช, ยี่ปั๊ว A)" value="${escapeHtml(company)}">
+            <select class="dist-company">
+              ${getDistributorSelectOptions(company)}
+            </select>
           </div>
           <div>
             <input type="number" class="dist-price" placeholder="ราคาต้นทุน" step="0.01" min="0" value="${price}">
@@ -1224,8 +1375,8 @@
           return `
             <tr class="${row.bestQuote ? 'highlight-row' : ''}">
               <td class="num">${row.no}</td>
-              <td class="code-text">${escapeHtml(row.code)}</td>
-              <td>
+              <td class="code-text clickable-cell" data-edit-code="${escapeHtml(row.code)}" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">${escapeHtml(row.code)}</td>
+              <td class="clickable-cell" data-edit-code="${escapeHtml(row.code)}" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">
                 <strong style="color: var(--ink);">${escapeHtml(row.name)}</strong>
               </td>
               <td class="num">${formatNumber(row.stock)}</td>
@@ -1296,6 +1447,7 @@
           p.orderQty = 0;
         });
         restoreOrdersBtn.style.display = 'inline-flex';
+        saveProductsState();
         renderAll();
       });
 
@@ -1305,6 +1457,7 @@
           p.orderQty = Math.max(0, p.max - p.min);
         });
         restoreOrdersBtn.style.display = 'none';
+        saveProductsState();
         renderAll();
       });
 
@@ -1313,6 +1466,82 @@
         const file = e.target.files && e.target.files[0];
         handleFileUpload(file);
       });
+
+      // Tab switching logic
+      tabUploadBtn.addEventListener('click', () => {
+        tabUploadBtn.classList.add('active');
+        tabDistributorsBtn.classList.remove('active');
+        tabContentUpload.style.display = 'block';
+        tabContentDistributors.style.display = 'none';
+      });
+
+      tabDistributorsBtn.addEventListener('click', () => {
+        tabDistributorsBtn.classList.add('active');
+        tabUploadBtn.classList.remove('active');
+        tabContentUpload.style.display = 'none';
+        tabContentDistributors.style.display = 'block';
+        renderDistributorBadges();
+      });
+
+      // Render standard distributor list badges
+      function renderDistributorBadges() {
+        if (distributorsList.length === 0) {
+          distributorsBadgeList.innerHTML = `<span style="color:var(--muted); font-size:13px; font-style:italic;">ยังไม่มีรายชื่อผู้จัดจำหน่ายมาตรฐาน</span>`;
+          return;
+        }
+
+        distributorsBadgeList.innerHTML = distributorsList.map((d, idx) => `
+          <span class="distributor-badge">
+            🏢 ${escapeHtml(d)}
+            <span class="remove-btn" data-remove-idx="${idx}" title="ลบรายชื่อนี้">✕</span>
+          </span>
+        `).join('');
+
+        // Wire up remove click listeners
+        distributorsBadgeList.querySelectorAll('[data-remove-idx]').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const idx = parseInt(this.getAttribute('data-remove-idx'), 10);
+            distributorsList.splice(idx, 1);
+            saveDistributorsState();
+            renderDistributorBadges();
+            refreshActiveEditorSelects();
+          });
+        });
+      }
+
+      // Add new distributor standard name
+      addNewDistributorBtn.addEventListener('click', () => {
+        const name = newDistributorInput.value.trim();
+        if (!name) return;
+        
+        // Prevent exact duplicates
+        if (!distributorsList.some(d => d.toLowerCase().trim() === name.toLowerCase().trim())) {
+          distributorsList.push(name);
+          saveDistributorsState();
+          newDistributorInput.value = '';
+          renderDistributorBadges();
+          refreshActiveEditorSelects();
+        } else {
+          alert("มีชื่อผู้จัดจำหน่ายนี้ในระบบอยู่แล้ว");
+        }
+      });
+
+      newDistributorInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          addNewDistributorBtn.click();
+        }
+      });
+
+      // Helper to update dropdowns in the active editor row on the fly
+      function refreshActiveEditorSelects() {
+        if (selectedProductCode) {
+          const selects = distributorRowsContainer.querySelectorAll('.dist-company');
+          selects.forEach(sel => {
+            const currentVal = sel.value;
+            sel.innerHTML = getDistributorSelectOptions(currentVal);
+          });
+        }
+      }
 
 
       // --- 4. Excel/CSV File Upload and Parsing ---
@@ -1417,8 +1646,10 @@
 
             // Successfully loaded new product list!
             products = parsedProducts;
-            activeReportText.textContent = `ไฟล์รายงานปัจจุบัน: ${file.name} (${products.length} รายการ)`;
+            activeReportName = `${file.name} (${products.length} รายการ)`;
+            activeReportText.textContent = `ไฟล์รายงานปัจจุบัน: ${activeReportName}`;
             uploadZoneTitle.textContent = `✅ อัปโหลดไฟล์เรียบร้อยแล้ว: ${file.name}`;
+            saveProductsState();
             
             // Re-populate and render everything
             populateMedicineDatalist();
@@ -1482,6 +1713,7 @@
       }
 
       // Perform initial render
+      activeReportText.textContent = `ไฟล์รายงานปัจจุบัน: ${activeReportName}`;
       renderAll();
     })();
   </script>
