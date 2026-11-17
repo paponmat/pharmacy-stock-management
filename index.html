@@ -1,0 +1,1448 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ระบบคำนวณยอดสั่งซื้อยาและเปรียบเทียบต้นทุน — สบายดีฟาร์มาซี</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f7f6;
+      --surface: #ffffff;
+      --surface-subtle: #f8faf9;
+      --border: #dce4e1;
+      --border-strong: #c1cfca;
+      --ink: #132620;
+      --muted: #566b64;
+      --brand: #0f766e;
+      --brand-hover: #0d5f59;
+      --brand-soft: #e6f4f2;
+      --brand-ink: #ffffff;
+      --accent: #0284c7;
+      --accent-soft: #e0f2fe;
+      --success: #15803d;
+      --success-soft: #dcfce7;
+      --warning: #b45309;
+      --warning-soft: #fef3c7;
+      --danger: #b91c1c;
+      --danger-soft: #fee2e2;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 1px 3px rgba(19, 38, 32, 0.06), 0 1px 2px rgba(19, 38, 32, 0.04);
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --font: "Sarabun", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.5;
+      font-size: 15px;
+    }
+
+    .app-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: var(--space-5) var(--space-6);
+    }
+
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+    }
+
+    .header-title-group h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .header-meta {
+      margin-top: var(--space-1);
+      color: var(--muted);
+      font-size: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      align-items: center;
+    }
+
+    .meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--space-6);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+    }
+
+    /* Layout Grid */
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+
+    @media (min-width: 1024px) {
+      .top-grid {
+        grid-template-columns: 5fr 7fr;
+        align-items: start;
+      }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: var(--space-6);
+    }
+
+    .card-header {
+      margin-bottom: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .card-subtitle {
+      margin: 0;
+      font-size: 13.5px;
+      color: var(--muted);
+    }
+
+    /* Upload Area */
+    .upload-zone {
+      border: 2px dashed var(--border-strong);
+      border-radius: var(--radius);
+      padding: var(--space-5) var(--space-4);
+      text-align: center;
+      background: var(--surface-subtle);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--brand);
+      background: var(--brand-soft);
+    }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-icon {
+      font-size: 32px;
+      margin-bottom: var(--space-2);
+      color: var(--brand);
+    }
+
+    .upload-title {
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: var(--space-1);
+    }
+
+    .upload-desc {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* Distributor input row builder */
+    .distributor-manager {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .product-select-wrapper {
+      position: relative;
+    }
+
+    .distributor-list-container {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: var(--space-4);
+    }
+
+    .distributor-rows {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      margin-bottom: var(--space-4);
+    }
+
+    .distributor-row {
+      display: grid;
+      grid-template-columns: 1fr 120px 50px;
+      gap: var(--space-2);
+      align-items: center;
+    }
+
+    @media (max-width: 480px) {
+      .distributor-row {
+        grid-template-columns: 1fr;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: var(--space-3);
+      }
+    }
+
+    /* Buttons */
+    .btn {
+      font: inherit;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s, border-color 0.15s, transform 0.05s;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: var(--brand);
+      color: var(--brand-ink);
+    }
+
+    .btn-primary:hover {
+      background: var(--brand-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--ink);
+      border-color: var(--border-strong);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-subtle);
+    }
+
+    .btn-text-accent {
+      background: transparent;
+      color: var(--brand);
+      font-size: 14px;
+      padding: var(--space-1) var(--space-2);
+    }
+
+    .btn-text-accent:hover {
+      background: var(--brand-soft);
+    }
+
+    .btn-danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border-color: transparent;
+    }
+
+    .btn-danger:hover {
+      background: #fecaca;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 13.5px;
+      border-radius: 6px;
+    }
+
+    /* Autocomplete / Input Styles */
+    input[type="text"],
+    input[type="number"],
+    input[type="search"],
+    select {
+      width: 100%;
+      font: inherit;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--ink);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+    }
+
+    .field-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    /* Selected Med Detail Info */
+    .selected-med-banner {
+      background: var(--brand-soft);
+      border: 1px solid rgba(15, 118, 110, 0.25);
+      border-radius: var(--radius-sm);
+      padding: var(--space-3) var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+
+    .selected-med-banner-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--brand);
+      margin-bottom: 2px;
+    }
+
+    .selected-med-banner-meta {
+      font-size: 13.5px;
+      color: var(--ink);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+
+    /* Empty States */
+    .empty-state {
+      text-align: center;
+      padding: var(--space-8) var(--space-4);
+      background: var(--surface-subtle);
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+    }
+
+    .empty-state strong {
+      display: block;
+      color: var(--ink);
+      font-size: 15.5px;
+      margin-bottom: 6px;
+    }
+
+    /* Recommendation summaries grouped by supplier */
+    .supplier-summary-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      overflow: hidden;
+      margin-bottom: var(--space-4);
+    }
+
+    .supplier-summary-header {
+      padding: var(--space-3) var(--space-4);
+      background: var(--brand-soft);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .supplier-name {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--brand);
+    }
+
+    .supplier-totals {
+      font-weight: 700;
+      font-size: 14.5px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    /* Table Toolbar */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-4);
+    }
+
+    .toolbar-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      flex: 1;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 260px;
+      max-width: 420px;
+    }
+
+    .filter-select {
+      width: auto;
+      min-width: 220px;
+    }
+
+    /* Tables styled */
+    .table-wrapper {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    th {
+      background: var(--surface-subtle);
+      color: var(--ink);
+      font-weight: 700;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    th.sortable {
+      cursor: pointer;
+    }
+
+    th.sortable:hover {
+      background: #edf2f0;
+    }
+
+    tbody tr:hover {
+      background: #f5faf8;
+    }
+
+    tbody tr.highlight-row {
+      background: #eef8f6;
+    }
+
+    .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .code-text {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .qty-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 13.5px;
+    }
+
+    .qty-positive {
+      background: var(--brand-soft);
+      color: var(--brand);
+    }
+
+    .qty-zero {
+      background: #f1f5f4;
+      color: var(--muted);
+    }
+
+    .comparison-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .comparison-item {
+      font-size: 12.5px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-2);
+    }
+
+    .comparison-item.cheapest {
+      background: var(--success-soft);
+      border-color: #86efac;
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .no-quote-tag {
+      color: var(--muted);
+      font-style: italic;
+      font-size: 13px;
+    }
+
+    .success-text {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .pill-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .saving-pill {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+
+    .not-order-pill {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+    /* Datalist helper styling */
+    .autocomplete-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid var(--border-strong);
+      border-top: none;
+      background: var(--surface);
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      position: absolute;
+      width: 100%;
+      z-index: 50;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .autocomplete-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 13.5px;
+      border-bottom: 1px solid #f0f4f2;
+    }
+
+    .autocomplete-item:hover {
+      background: var(--brand-soft);
+      color: var(--brand);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-title-group">
+        <h1>ระบบคำนวณยอดสั่งซื้อยาและเปรียบเทียบต้นทุนบริษัท</h1>
+        <div class="header-meta">
+          <span class="meta-pill" id="storeNameBadge">สบายดีฟาร์มาซี (สาขา: สำนักงานใหญ่)</span>
+          <span id="activeReportText" style="font-weight: 500;">ไฟล์รายงานปัจจุบัน: รายงานสินค้าใกล้หมด_2026-11-17.xlsx (149 รายการ)</span>
+          <span>• สูตรคำนวณยอดสั่งซื้อ: <strong>Max Stock - Min Stock</strong></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="top-grid">
+      <!-- Left side: File upload & Supplier Price Input Form -->
+      <div style="display: flex; flex-direction: column; gap: var(--space-6);">
+        
+        <!-- 1. File upload panel -->
+        <section class="card" aria-labelledby="uploadHeading">
+          <div class="card-header">
+            <h2 class="card-title" id="uploadHeading">อัปโหลดรายงานสินค้าใกล้หมด</h2>
+            <p class="card-subtitle">สามารถอัปโหลดไฟล์ใหม่ได้ทุกครั้งเพื่อนำเข้ายอดคงเหลือและข้อมูล Max/Min ล่าสุด</p>
+          </div>
+          <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">📥</div>
+            <div class="upload-title" id="uploadZoneTitle">ลากไฟล์รายงานที่ต้องการอัปโหลดมาที่นี่ หรือคลิกเพื่อเลือกไฟล์</div>
+            <div class="upload-desc">รองรับไฟล์ Excel (.xlsx) และ CSV (.csv) ตามโครงสร้างรายงานเดิม</div>
+            <input type="file" id="fileInput" accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+          </div>
+        </section>
+
+        <!-- 2. Distributor Price Editor Panel -->
+        <section class="card" aria-labelledby="priceEditorHeading">
+          <div class="card-header">
+            <h2 class="card-title" id="priceEditorHeading">บันทึกราคาผู้จำหน่ายตามสินค้า (Product Supplier Manager)</h2>
+            <p class="card-subtitle">เลือกสินค้าแล้วกำหนดข้อมูลราคาของผู้จัดจำหน่ายแต่ละราย สามารถแก้ไขหรือเพิ่มข้อมูลได้ตลอดเวลา</p>
+          </div>
+
+          <div class="distributor-manager">
+            <div class="field" style="position: relative;">
+              <label class="field-label" for="searchProductInput">เลือกสินค้าหรือพิมพ์ค้นหา</label>
+              <input
+                type="text"
+                id="searchProductInput"
+                placeholder="พิมพ์ รหัสสินค้า หรือ ชื่อสินค้าเพื่อค้นหาและเลือก..."
+                autocomplete="off"
+              >
+              <div id="autocompleteList" class="autocomplete-list" style="display: none;"></div>
+            </div>
+
+            <div id="activeEditorSection" style="display: none;">
+              <div class="selected-med-banner">
+                <div class="selected-med-banner-title" id="editMedTitle"></div>
+                <div class="selected-med-banner-meta" id="editMedMeta"></div>
+              </div>
+
+              <div class="distributor-list-container">
+                <div class="field-label">ราคาจากผู้จัดจำหน่ายรายต่าง ๆ ของสินค้านี้</div>
+                
+                <div class="distributor-rows" id="distributorRowsContainer">
+                  <!-- Dynamic distributor rows will render here -->
+                </div>
+
+                <button type="button" class="btn btn-secondary btn-sm" id="addDistRowBtn">
+                  ➕ เพิ่มผู้จัดจำหน่าย / ตัวเปรียบเทียบ
+                </button>
+              </div>
+
+              <div class="btn-row" style="margin-top: var(--space-4);">
+                <button type="button" class="btn btn-primary" id="saveProductQuotesBtn" style="flex: 1;">
+                  💾 บันทึกข้อมูลราคาสินค้านี้
+                </button>
+                <button type="button" class="btn btn-secondary" id="cancelEditBtn">
+                  ยกเลิก
+                </button>
+              </div>
+            </div>
+
+            <div id="editorEmptyState" class="empty-state">
+              <strong>ยังไม่ได้เลือกรายการสินค้า</strong>
+              พิมพ์เลือกชื่อยาด้านบน หรือคลิกปุ่ม <strong>"กรอก/แก้ไขราคา"</strong> ในตารางสินค้าด้านล่าง เพื่อเปิดใช้งานตัวจัดการราคา
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right side: Recommended Ordering Grouped by cheapest supplier -->
+      <section class="card" aria-labelledby="recommendationHeading">
+        <div class="card-header">
+          <h2 class="card-title" id="recommendationHeading">สรุปรายการสั่งซื้อที่ประหยัดต้นทุนสูงสุด (Recommended Orders)</h2>
+          <p class="card-subtitle">ระบบจัดชุดผู้จำหน่ายที่ให้ราคาต่ำที่สุดของแต่ละรายการยาโดยอัตโนมัติ เพื่อประหยัดต้นทุนสูงสุด</p>
+        </div>
+
+        <div id="supplierRecommendationsContainer">
+          <!-- Dynamically populated recommended purchases grouped by cheapest vendor -->
+        </div>
+      </section>
+    </div>
+
+    <!-- Main Full-Width Table Section -->
+    <section class="card" aria-labelledby="mainTableHeading">
+      <div class="card-header">
+        <h2 class="card-title" id="mainTableHeading">ตารางรายการคำนวณและเปรียบเทียบต้นทุนสั่งซื้อทั้งหมด</h2>
+        <p class="card-subtitle">แสดงรายการสินค้าทั้งหมดและยอดที่ต้องการสั่งซื้อ (Max Stock - Min Stock) พร้อมรายละเอียดราคาผู้จำหน่ายเปรียบเทียบ</p>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-filters">
+          <div class="search-box">
+            <input
+              type="search"
+              id="tableSearchInput"
+              placeholder="ค้นหาตามชื่อสินค้า, รหัส หรือชื่อผู้จำหน่าย..."
+              aria-label="ค้นหาสินค้าหรือรหัส"
+            >
+          </div>
+
+          <select id="statusFilter" class="filter-select" aria-label="กรองสถานะ">
+            <option value="need_order">เฉพาะรายการที่ต้องสั่งซื้อ (Max - Min &gt; 0)</option>
+            <option value="all">แสดงสินค้าทุกรายการในรายงาน</option>
+            <option value="has_quotes">เฉพาะรายการที่มีข้อมูลผู้จัดจำหน่ายแล้ว</option>
+            <option value="no_quotes">เฉพาะรายการที่ยังไม่มีการระบุราคาผู้จำหน่าย</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="no">ลำดับ <span class="sort-ind" data-col="no"></span></th>
+              <th class="sortable" data-sort="code">รหัสสินค้า <span class="sort-ind" data-col="code"></span></th>
+              <th class="sortable" data-sort="name">ชื่อสินค้า / เวชภัณฑ์ <span class="sort-ind" data-col="name"></span></th>
+              <th class="sortable num" data-sort="stock">คงเหลือ <span class="sort-ind" data-col="stock"></span></th>
+              <th class="sortable num" data-sort="max">Max <span class="sort-ind" data-col="max"></span></th>
+              <th class="sortable num" data-sort="min">Min <span class="sort-ind" data-col="min"></span></th>
+              <th class="sortable num" data-sort="orderQty">ต้องสั่ง (Max-Min) <span class="sort-ind" data-col="orderQty">▼</span></th>
+              <th>หน่วย</th>
+              <th>เปรียบเทียบราคาผู้จัดจำหน่าย</th>
+              <th class="sortable num" data-sort="bestCost">ราคาต่ำสุด <span class="sort-ind" data-col="bestCost"></span></th>
+              <th class="sortable num" data-sort="totalCost">รวมต้นทุน <span class="sort-ind" data-col="totalCost"></span></th>
+              <th style="text-align: center;">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTableBody">
+            <!-- Table rows will populate here dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- SheetJS CDN (We handle xlsx and csv parsing perfectly in JS client side!) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Raw initial embedded data -->
+  <script id="app-data" type="application/json">[{"no": 1, "code": "PCO00060", "name": "3M NEXCARE FIRST AID TRANSPORE 1\" X 5 YDS", "max": 12, "min": 3, "stock": 0, "lastBuy": 24, "unit": "ม้วน", "orderQty": 9}, {"no": 2, "code": "PCO01288", "name": "DEOLIN 40 MG TABLETS 10'S", "max": 5, "min": 1, "stock": 0, "lastBuy": 10, "unit": "แผง", "orderQty": 4}, {"no": 3, "code": "PCO01310", "name": "DERMOVATE CREAM 15 G", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "หลอด", "orderQty": 1}, {"no": 4, "code": "PCO01311", "name": "DERMOVATE CREAM 5 G", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "หลอด", "orderQty": 1}, {"no": 5, "code": "PCO01885", "name": "FISHERMAN'S FRIEND SUGAR FREE ORIGIN LOZENGES 25 G", "max": 3, "min": 1, "stock": 0, "lastBuy": 4, "unit": "ซอง", "orderQty": 2}, {"no": 6, "code": "PCO02302", "name": "HIDIL 600 MG TABLETS 10'S", "max": 10, "min": 0, "stock": 0, "lastBuy": 10, "unit": "แผง", "orderQty": 10}, {"no": 7, "code": "PCO02897", "name": "MAALOX ALUM MILK ORAL SUSPENSION 240 ML", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 8, "code": "PCO04434", "name": "ORANGE SCOTT'S EMULSION 200 ML", "max": 1, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ขวด", "orderQty": 0}, {"no": 9, "code": "PCO07162", "name": "สำลีม้วน ตรารถพยาบาล 80 ก.", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ห่อ", "orderQty": 1}, {"no": 10, "code": "PCO07824", "name": "ROWATINEX SOFT CAPSULES 10'S", "max": 10, "min": 2, "stock": 0, "lastBuy": 10, "unit": "แผง", "orderQty": 8}, {"no": 11, "code": "PCO08903", "name": "FLAVORIN 100 MG TABLETS 10'S", "max": 13, "min": 3, "stock": 0, "lastBuy": 10, "unit": "แผง", "orderQty": 10}, {"no": 12, "code": "PCO10513", "name": "กำลังช้างสาร ตราสมุนไพรคุณสัมฤทธิ์ ชนิดแคปซูล 60'S", "max": 3, "min": 1, "stock": 0, "lastBuy": 2, "unit": "กระปุก", "orderQty": 2}, {"no": 13, "code": "PCO11764", "name": "ENSURE CHOCOLATE FLAVORED 850 G", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "กระปุก", "orderQty": 1}, {"no": 14, "code": "PCO12070", "name": "PREGABALIN TEVA 75 MG 14'S", "max": 4, "min": 2, "stock": 0, "lastBuy": 4, "unit": "แผง", "orderQty": 2}, {"no": 15, "code": "PCO13345", "name": "GREATER CAL-D 600 MG. 60'S", "max": 3, "min": 1, "stock": 0, "lastBuy": 2, "unit": "กระปุก", "orderQty": 2}, {"no": 16, "code": "PCO13859", "name": "REAL SESAME OIL 500 MG CAPSULES 30'S", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 17, "code": "PCU00120", "name": "GLUCOSA-500 10x10's", "max": 13, "min": 3, "stock": 0, "lastBuy": 10, "unit": "แผง", "orderQty": 10}, {"no": 18, "code": "PCU00194", "name": "SYSTANE ULTRA Fast-Acting 10 ML", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "BT", "orderQty": 1}, {"no": 19, "code": "PCU00198", "name": "HYDROCHLOROTHIAZIDE GPO 50 MG TABLETS 10'S", "max": 3, "min": 1, "stock": 0, "lastBuy": 4, "unit": "แผง", "orderQty": 2}, {"no": 20, "code": "PCU00243", "name": "BUFLEX 600 MG TAB", "max": 500, "min": 100, "stock": 0, "lastBuy": 500, "unit": "TAB", "orderQty": 400}, {"no": 21, "code": "PCO15103", "name": "GAVISCON ADVANCE SUSPENSION 150 ML", "max": 1, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ขวด", "orderQty": 0}, {"no": 22, "code": "PCU00268", "name": "MEDICET 5 MG 10'S", "max": 10, "min": 3, "stock": 0, "lastBuy": 1, "unit": "แผง", "orderQty": 7}, {"no": 23, "code": "PCU00275", "name": "NAPRONAC (Naproxen) 250 MG", "max": 150, "min": 50, "stock": 0, "lastBuy": 150, "unit": "แผง", "orderQty": 100}, {"no": 24, "code": "PCO15349", "name": "BEPANTHEN FIRST AID 3.5 G", "max": 2, "min": 1, "stock": 0, "lastBuy": 2, "unit": "BX", "orderQty": 1}, {"no": 25, "code": "PCU00329", "name": "TUBIGRIP FEEL FREE ANKLE M", "max": 1, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ชิ้น", "orderQty": 0}, {"no": 26, "code": "PCU00403", "name": "FLUTINE TABLETS 10'S", "max": 5, "min": 0, "stock": 0, "lastBuy": 5, "unit": "แผง", "orderQty": 5}, {"no": 27, "code": "PCU00422", "name": "DESLORA 5 MG 10 TABLETS", "max": 2, "min": 1, "stock": 0, "lastBuy": 0, "unit": "กล่อง", "orderQty": 1}, {"no": 28, "code": "PCU00425", "name": "TUBIGRIP FEEL FREE Palm S", "max": 2, "min": 1, "stock": 0, "lastBuy": 2, "unit": "กล่อง", "orderQty": 1}, {"no": 29, "code": "PCO16885", "name": "หน้ากาก KF94 NEXT HEALTH 10'S (สีขาว)", "max": 20, "min": 5, "stock": 0, "lastBuy": 10, "unit": "ซอง", "orderQty": 15}, {"no": 30, "code": "PCO16914", "name": "NEXT HEALTH เครื่องวัดความดัน NH-881 (LARGE CUFF)", "max": 1, "min": 1, "stock": 0, "lastBuy": 1, "unit": "เครื่อง", "orderQty": 0}, {"no": 31, "code": "PCU00483", "name": "เขาค้อ ทะเลภู แฮร์ โทนิค 80 มล.", "max": 3, "min": 1, "stock": 0, "lastBuy": 3, "unit": "ขวด", "orderQty": 2}, {"no": 32, "code": "PCO00730", "name": "Blackmores Naturetime Buffered C 500 MG. 200'S.", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 33, "code": "PCO02058", "name": "GASTRO-BISMOL (SALA) SUSPENSION 240 ML", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 34, "code": "PCO04421", "name": "SCHERIPROCT N SUPPOSITORIES 10'S", "max": 1, "min": 1, "stock": 1, "lastBuy": 2, "unit": "กล่อง", "orderQty": 0}, {"no": 35, "code": "PCO04572", "name": "SMOOTH E CREAM 7 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 36, "code": "PCO04786", "name": "SYRINGE BALL NO.5", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ลูก", "orderQty": 0}, {"no": 37, "code": "PCO05000", "name": "TIGERPLAST HIGH HEEL BUDDY กันรองเท้ากัด 9ชิ้น", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "กล่อง", "orderQty": 0}, {"no": 38, "code": "PCO05497", "name": "MEGA NATURAL VITAMIN E 200 IU CAPSULES 60'S", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 0}, {"no": 39, "code": "PCO06750", "name": "ยาน้ำว่านชักมดลูกจอมใจ 300 ซีซี", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 0}, {"no": 40, "code": "PCO07710", "name": "REPARIL-GEL N 10 G", "max": 2, "min": 1, "stock": 1, "lastBuy": 2, "unit": "หลอด", "orderQty": 1}, {"no": 41, "code": "PCO09893", "name": "NAT-B CAPSULES 100'S", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "กระปุก", "orderQty": 0}, {"no": 42, "code": "PCO13698", "name": "POLIDINE SOLUTION 10% 450 ML", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 43, "code": "PCU00036", "name": "TOTAMOL 120 พารา น้ำ โททามอล 120มก. 60 มล.(สีชมพู TO)", "max": 6, "min": 3, "stock": 1, "lastBuy": 6, "unit": "ขวด", "orderQty": 3}, {"no": 44, "code": "PCU00060", "name": "TIGERPLAST LEOPOVIDINE GEL 20G", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 1}, {"no": 45, "code": "PCU00067", "name": "กระเป๋าน้ำร้อน ใหญ่ อย่างดี", "max": 1, "min": 1, "stock": 1, "lastBuy": 2, "unit": "อัน", "orderQty": 0}, {"no": 46, "code": "PCU00180", "name": "CANESBALANCE VAGINA GEL 7 Tubes", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "กล่อง", "orderQty": 0}, {"no": 47, "code": "PCU00272", "name": "FUTURO ADJUSTABLE WRIST SUPPORT COMPRESSION BASICS ข้อมือ", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ชิ้น", "orderQty": 1}, {"no": 48, "code": "PCU00432", "name": "VISSCO CORE ARM POUCH SLING NO.0805/0820 (M)", "max": 1, "min": 1, "stock": 1, "lastBuy": 2, "unit": "กล่อง", "orderQty": 0}, {"no": 49, "code": "PCU00433", "name": "VISSCO CORE HINGED KNEE CAP O.0706 (M)", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "กล่อง", "orderQty": 0}, {"no": 50, "code": "PCU00461", "name": "REAL ELIXIR 3 LEGEND 4 CAPSULES", "max": 5, "min": 2, "stock": 1, "lastBuy": 4, "unit": "BX", "orderQty": 3}, {"no": 51, "code": "PCU00468", "name": "Dr.Morepen Gluco One Monitoring BG-03", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "BX", "orderQty": 0}, {"no": 52, "code": "PCO00362", "name": "AUREOMYCIN 250 MG CAPSULES 10'S", "max": 4, "min": 2, "stock": 2, "lastBuy": 2, "unit": "แผง", "orderQty": 2}, {"no": 53, "code": "PCO03999", "name": "POLYGOT TABLETS 10'S", "max": 20, "min": 10, "stock": 2, "lastBuy": 10, "unit": "แผง", "orderQty": 10}, {"no": 54, "code": "PCO04308", "name": "ROSIL 1% TOPICAL SOLUTION 10 ML.", "max": 8, "min": 3, "stock": 2, "lastBuy": 8, "unit": "ขวด", "orderQty": 5}, {"no": 55, "code": "PCO06535", "name": "ยากุมารตรากาไก่ 300 ซีซี", "max": 3, "min": 2, "stock": 2, "lastBuy": 2, "unit": "ขวด", "orderQty": 1}, {"no": 56, "code": "PCO14249", "name": "SALONPAS PLASTER กล่อง 10 ชิ้น", "max": 3, "min": 2, "stock": 2, "lastBuy": 5, "unit": "กล่อง", "orderQty": 1}, {"no": 57, "code": "PCO14879", "name": "VELDENT MOUTH SPRAY 18 ML", "max": 4, "min": 2, "stock": 2, "lastBuy": 3, "unit": "ขวด", "orderQty": 2}, {"no": 58, "code": "PCU00373", "name": "ENSURE VANILLA 800 G", "max": 3, "min": 2, "stock": 2, "lastBuy": 3, "unit": "กระป๋อง", "orderQty": 1}, {"no": 59, "code": "PCU00451", "name": "MYOFLEX 10 TABLETS", "max": 30, "min": 10, "stock": 2, "lastBuy": 30, "unit": "แผง", "orderQty": 20}, {"no": 60, "code": "PCU00455", "name": "Covid19 RSV Flu A/B 4in1 ATK", "max": 10, "min": 3, "stock": 2, "lastBuy": 30, "unit": "กล่อง", "orderQty": 7}, {"no": 61, "code": "PCO14455", "name": "VESPERIDONE 10 MG TABLETS 10'S", "max": 75, "min": 25, "stock": 3, "lastBuy": 100, "unit": "แผง", "orderQty": 50}, {"no": 62, "code": "PCU00037", "name": "TOTAMOL 250 พารา น้ำ โททามอล 250มก. 60 มล.", "max": 10, "min": 3, "stock": 3, "lastBuy": 6, "unit": "ขวด", "orderQty": 7}, {"no": 63, "code": "PCU00276", "name": "KRESS-HISTINE 24", "max": 15, "min": 5, "stock": 3, "lastBuy": 50, "unit": "แผง", "orderQty": 10}, {"no": 64, "code": "PCO16423", "name": "MEDIFIX ADHESIVE WOUND DRESSING ROLL 10CMX1M", "max": 8, "min": 4, "stock": 3, "lastBuy": 4, "unit": "กล่อง", "orderQty": 4}, {"no": 65, "code": "PCU00108", "name": "ยาน้ำมันเหลือง สมถวิล", "max": 17, "min": 5, "stock": 4, "lastBuy": 12, "unit": "ขวด", "orderQty": 12}, {"no": 66, "code": "PCU00181", "name": "RHINOTAPP SYRUP ไรโนแท๊ป 60มล.", "max": 18, "min": 6, "stock": 4, "lastBuy": 12, "unit": "กล่อง", "orderQty": 12}, {"no": 67, "code": "PCU00240", "name": "NEXT HEALTH MEDICAL FACE MASK (BLACK)", "max": 6, "min": 4, "stock": 4, "lastBuy": 2, "unit": "กล่อง", "orderQty": 2}, {"no": 68, "code": "PCU00331", "name": "VEREN 50 MG 10'S", "max": 50, "min": 10, "stock": 4, "lastBuy": 50, "unit": "แผง", "orderQty": 40}, {"no": 69, "code": "PCO08786", "name": "CLINOVIR-200 MG TABLETS 5'S", "max": 15, "min": 5, "stock": 5, "lastBuy": 15, "unit": "แผง", "orderQty": 10}, {"no": 70, "code": "PCO15436", "name": "NEUPENTIN 300 MG TABLETS 10’S", "max": 15, "min": 5, "stock": 5, "lastBuy": 10, "unit": "แผง", "orderQty": 10}, {"no": 71, "code": "PCU00317", "name": "BELLA PARA 500 MG 10'S", "max": 50, "min": 10, "stock": 5, "lastBuy": 10, "unit": "แผง", "orderQty": 40}, {"no": 72, "code": "PCU00378", "name": "MEFE 500 10'S", "max": 50, "min": 20, "stock": 6, "lastBuy": 50, "unit": "แผง", "orderQty": 30}, {"no": 73, "code": "PCO02397", "name": "ICOLID 15 MG TABLETS 10'S", "max": 50, "min": 20, "stock": 10, "lastBuy": 50, "unit": "แผง", "orderQty": 30}, {"no": 74, "code": "PCO03220", "name": "MYMOL 500 MG. 10'S", "max": 50, "min": 20, "stock": 11, "lastBuy": 10, "unit": "แผง", "orderQty": 30}, {"no": 75, "code": "PCU00083", "name": "Tigerplast Sheer พลาสติก สีเนื้อ", "max": 100, "min": 100, "stock": 90, "lastBuy": 100, "unit": "ชิ้น", "orderQty": 0}, {"no": 76, "code": "PCO00731", "name": "Blackmores Naturetime Buffered C 500 MG. 31'S.", "max": 2, "min": 1, "stock": 0, "lastBuy": 2, "unit": "ขวด", "orderQty": 1}, {"no": 77, "code": "PCO00915", "name": "CELLUFRESH LUBRICANT EYE DROPS 0.4 ML 30'S", "max": 1, "min": 0, "stock": 0, "lastBuy": 1, "unit": "กล่อง", "orderQty": 1}, {"no": 78, "code": "PCO01817", "name": "EZERRA CREAM 25 G", "max": 1, "min": 1, "stock": 0, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 79, "code": "PCO01855", "name": "FIBRIL 160 MG CAPSULES 10'S", "max": 3, "min": 3, "stock": 0, "lastBuy": 3, "unit": "แผง", "orderQty": 0}, {"no": 80, "code": "PCO01884", "name": "FISHERMAN'S FRIEND ORIGINAL LOZENGES 25 G", "max": 3, "min": 1, "stock": 0, "lastBuy": 6, "unit": "ซอง", "orderQty": 2}, {"no": 81, "code": "PCO02225", "name": "WOODWARD'S GRIPE WATER SYRUP 148 ML", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 82, "code": "PCO02273", "name": "GPO-HCTZ HYDROCHLOROTHIAZIDE 25 MG TABLETS 10'S", "max": 4, "min": 1, "stock": 0, "lastBuy": 1, "unit": "แผง", "orderQty": 3}, {"no": 83, "code": "PCO02338", "name": "HIRUSCAR POST ACNE GEL 5 G", "max": 2, "min": 1, "stock": 0, "lastBuy": 3, "unit": "หลอด", "orderQty": 1}, {"no": 84, "code": "PCO02344", "name": "HISTATAB TABLETS 4 MG TABLETS 100'S", "max": 15, "min": 3, "stock": 0, "lastBuy": 30, "unit": "กระปุก", "orderQty": 12}, {"no": 85, "code": "PCO03161", "name": "MUCOLID SYRUP 60 ML", "max": 3, "min": 1, "stock": 0, "lastBuy": 0, "unit": "ขวด", "orderQty": 2}, {"no": 86, "code": "PCO05356", "name": "VILERM 400 MG TABLETS 5'S", "max": 21, "min": 7, "stock": 0, "lastBuy": 28, "unit": "แผง", "orderQty": 14}, {"no": 87, "code": "PCO05529", "name": "VOLTAREN EMULGEL 50 G", "max": 1, "min": 1, "stock": 0, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 88, "code": "PCO06168", "name": "น้ำมันกวางลุ้ง H.R. 3 CC.", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 89, "code": "PCO06923", "name": "ยาหม่องน้ำเซียงเพียวอิ๊ว-น้ำแดง สูตร1 3 ซีซี", "max": 3, "min": 1, "stock": 0, "lastBuy": 2, "unit": "ขวด", "orderQty": 2}, {"no": 90, "code": "PCO07775", "name": "CLINODERM CREAM 15 G", "max": 6, "min": 3, "stock": 0, "lastBuy": 3, "unit": "กล่อง", "orderQty": 3}, {"no": 91, "code": "PCO07977", "name": "ยาดมผสมสมุนไพร สูตร 2 ตราหงส์ไทย 10 กรัม", "max": 10, "min": 3, "stock": 0, "lastBuy": 12, "unit": "กระปุก", "orderQty": 7}, {"no": 92, "code": "PCO08438", "name": "BONJELA 15G.", "max": 1, "min": 1, "stock": 0, "lastBuy": 2, "unit": "หลอด", "orderQty": 0}, {"no": 93, "code": "PCO09883", "name": "MEGA REGENEZ SOFTGEL CAPSULES 30'S", "max": 3, "min": 1, "stock": 0, "lastBuy": 2, "unit": "BX", "orderQty": 2}, {"no": 94, "code": "PCO10478", "name": "POLAR SPRAY 280 ML", "max": 2, "min": 1, "stock": 0, "lastBuy": 2, "unit": "ขวด", "orderQty": 1}, {"no": 95, "code": "PCO15096", "name": "SMECTA GO SUSPENSION 10 G", "max": 24, "min": 6, "stock": 0, "lastBuy": 72, "unit": "ซอง", "orderQty": 18}, {"no": 96, "code": "PCO00500", "name": "BENZAC AC 2.5 % GEL 60 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 97, "code": "PCO01159", "name": "COUNTERPAIN COOL GEL 60 G", "max": 3, "min": 1, "stock": 1, "lastBuy": 3, "unit": "หลอด", "orderQty": 2}, {"no": 98, "code": "PCO01218", "name": "CYSTALINE 600 MG TABLETS 10'S", "max": 10, "min": 3, "stock": 1, "lastBuy": 6, "unit": "หลอด", "orderQty": 7}, {"no": 99, "code": "PCO01789", "name": "EVRA TRANDERMAL PATCHES 3'S", "max": 1, "min": 1, "stock": 1, "lastBuy": 3, "unit": "BX", "orderQty": 0}, {"no": 100, "code": "PCO02327", "name": "HIRUDOID CREAM 20 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 101, "code": "PCO02328", "name": "HIRUDOID CREAM 40 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 102, "code": "PCO02331", "name": "HIRUDOID FORTE CREAM 20 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 103, "code": "PCO02556", "name": "KAMISTAD GEL N 10 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 104, "code": "PCO03271", "name": "NAPPY HIPPO CREAM  25 G", "max": 3, "min": 1, "stock": 1, "lastBuy": 3, "unit": "หลอด", "orderQty": 2}, {"no": 105, "code": "PCO03953", "name": "PLAIVANA CREAM 35 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 3, "unit": "หลอด", "orderQty": 0}, {"no": 106, "code": "PCO04543", "name": "SKINOREN CREAM 30 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 107, "code": "PCO04784", "name": "SYRINGE BALL NO.3", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ลูก", "orderQty": 0}, {"no": 108, "code": "PCO04814", "name": "SYSTRAL CREAM 25 G", "max": 2, "min": 1, "stock": 1, "lastBuy": 2, "unit": "หลอด", "orderQty": 1}, {"no": 109, "code": "PCO05061", "name": "TONAF 1% CREAM 5 G", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 1}, {"no": 110, "code": "PCO05429", "name": "VISTRA GRAPE SEED 60 MG CAPSULE 30'S", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 0}, {"no": 111, "code": "PCO07381", "name": "BAUSCH+LOMB RENU FRESH MULTI-PURPOSE SOL 355+60 ML", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "กล่อง", "orderQty": 0}, {"no": 112, "code": "PCO08428", "name": "MEGA LECITHIN 1200 MG CAPSULES 100'S", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "กระปุก", "orderQty": 0}, {"no": 113, "code": "PCO08835", "name": "HIRUDOID FORTE CREAM 10 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 114, "code": "PCO09048", "name": "COUNTERPAIN PLUS GEL 25 G", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 1}, {"no": 115, "code": "PCO09888", "name": "NAT D VITAMIN D3 1000 IU 60'S", "max": 1, "min": 1, "stock": 1, "lastBuy": 2, "unit": "กระปุก", "orderQty": 0}, {"no": 116, "code": "PCO12781", "name": "MONTULAIR 10 MG TABLETS 10'S", "max": 10, "min": 3, "stock": 1, "lastBuy": 10, "unit": "แผง", "orderQty": 7}, {"no": 117, "code": "PCO14213", "name": "EUGICA HERBAL MOUTH SPRAY 10 ML", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 118, "code": "PCO14804", "name": "YUWELL เครื่องวัดความดัน YE670A", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "เครื่อง", "orderQty": 0}, {"no": 119, "code": "PCO14871", "name": "SOS PLUS ACNE PATCH แผ่นแปะสิว 12'S", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "กล่อง", "orderQty": 1}, {"no": 120, "code": "PCO01156", "name": "COUNTERPAIN CREAM 60 G", "max": 6, "min": 2, "stock": 2, "lastBuy": 4, "unit": "หลอด", "orderQty": 4}, {"no": 121, "code": "PCO06893", "name": "ยาหม่องเซียงเพียว-ขาว 12G.", "max": 4, "min": 2, "stock": 2, "lastBuy": 2, "unit": "ขวด", "orderQty": 2}, {"no": 122, "code": "PCO06985", "name": "มังกรทอง ยาอมสมุนไพร รสมะนาว", "max": 6, "min": 2, "stock": 2, "lastBuy": 1, "unit": "ขวด", "orderQty": 4}, {"no": 123, "code": "PCO07327", "name": "PUDIN HARA CAPSULES 10'S", "max": 10, "min": 3, "stock": 2, "lastBuy": 10, "unit": "แผง", "orderQty": 7}, {"no": 124, "code": "PCO12909", "name": "Aerotamol 100 mcg 200 metered actuations", "max": 8, "min": 2, "stock": 2, "lastBuy": 2, "unit": "กล่อง", "orderQty": 6}, {"no": 125, "code": "PCO13428", "name": "FISHERMAN’S FRIEND SUGARFREE MIXED BERRIES 25 G", "max": 6, "min": 2, "stock": 2, "lastBuy": 4, "unit": "ซอง", "orderQty": 4}, {"no": 126, "code": "PCO04782", "name": "SYRINGE BALL NO.1", "max": 6, "min": 3, "stock": 3, "lastBuy": 3, "unit": "ลูก", "orderQty": 3}, {"no": 127, "code": "PCO05609", "name": "ZAM-BUK HR OINTMENT 8 G", "max": 6, "min": 3, "stock": 3, "lastBuy": 9, "unit": "ตลับ", "orderQty": 3}, {"no": 128, "code": "PCO08980", "name": "SIXIME 100 MG CAPSULE 10'S", "max": 10, "min": 5, "stock": 4, "lastBuy": 10, "unit": "BX", "orderQty": 5}, {"no": 129, "code": "PCO03974", "name": "SOS PLUS WATERPROOF T3 6x10CM", "max": 15, "min": 5, "stock": 5, "lastBuy": 10, "unit": "กล่อง", "orderQty": 10}, {"no": 130, "code": "PCO14183", "name": "LONGMED NET GAUZE 2\"", "max": 30, "min": 20, "stock": 10, "lastBuy": 10, "unit": "ซอง", "orderQty": 10}, {"no": 131, "code": "PCO00014", "name": "PEPPERMINT FIELD INHALER 2 ML", "max": 6, "min": 2, "stock": 0, "lastBuy": 0, "unit": "หลอด", "orderQty": 4}, {"no": 132, "code": "PCO00232", "name": "AMOKSIKLAV 2X 1000 MG TABLETS 10'S", "max": 6, "min": 2, "stock": 0, "lastBuy": 2, "unit": "กล่อง", "orderQty": 4}, {"no": 133, "code": "PCO07356", "name": "TAMJAI POWDER", "max": 120, "min": 30, "stock": 0, "lastBuy": 300, "unit": "ซอง", "orderQty": 90}, {"no": 134, "code": "PCO09103", "name": "EUROFER-IRON 10 MG/ML SYRUP 60 ML", "max": 1, "min": 1, "stock": 0, "lastBuy": 1, "unit": "กล่อง", "orderQty": 0}, {"no": 135, "code": "PCO00223", "name": "AMMELTZ YOKO YOKO 82 ML", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 0}, {"no": 136, "code": "PCO05600", "name": "XYZAL TABLETS 10'S", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "BX", "orderQty": 1}, {"no": 137, "code": "PCO06926", "name": "ยาหม่องน้ำตราถ้วยทอง 3 ซีซี", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 138, "code": "PCO07709", "name": "REPARIL-GEL N 20 G", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 1}, {"no": 139, "code": "PCO09365", "name": "PURICAS DRAGON'S BLOOD SCAR GEL 8 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 140, "code": "PCO11853", "name": "RETEN FIVE SOLUTION 30 ML", "max": 2, "min": 1, "stock": 1, "lastBuy": 2, "unit": "ขวด", "orderQty": 1}, {"no": 141, "code": "PCO03988", "name": "POLIDENT DENTURE ADHESIVE CREAM (FRESH MINT) 60 G", "max": 3, "min": 2, "stock": 2, "lastBuy": 2, "unit": "หลอด", "orderQty": 1}, {"no": 142, "code": "PCO09078", "name": "RE-B FORTE TABLETS 10'S", "max": 10, "min": 5, "stock": 2, "lastBuy": 10, "unit": "แผง", "orderQty": 5}, {"no": 143, "code": "PCO10667", "name": "POLIDENT DENTURE ADHESIVE CREAM (FRESH MINT) 20 G", "max": 4, "min": 2, "stock": 2, "lastBuy": 3, "unit": "หลอด", "orderQty": 2}, {"no": 144, "code": "PCO00528", "name": "BETADINE SOLUTION 15 ML", "max": 6, "min": 3, "stock": 3, "lastBuy": 4, "unit": "ขวด", "orderQty": 3}, {"no": 145, "code": "PCO04621", "name": "SOBELIN 5 MG CAPSULES 10'S", "max": 60, "min": 10, "stock": 7, "lastBuy": 50, "unit": "แผง", "orderQty": 50}, {"no": 146, "code": "PCO10543", "name": "MAPLE FORTE TABLETS 1'S", "max": 60, "min": 24, "stock": 11, "lastBuy": 24, "unit": "กล่อง", "orderQty": 36}, {"no": 147, "code": "PCO02555", "name": "KAMILLOSAN M SPRAY 15 ML", "max": 24, "min": 12, "stock": 12, "lastBuy": 10, "unit": "ขวด", "orderQty": 12}, {"no": 148, "code": "PCO06902", "name": "ยาหม่องตราถ้วยทอง 12 กรัม", "max": 16, "min": 4, "stock": 4, "lastBuy": 12, "unit": "ขวด", "orderQty": 12}, {"no": 149, "code": "PCO10468", "name": "MOXIPHARM 500 MG CAPSULES 10'S", "max": 200, "min": 100, "stock": 63, "lastBuy": 50, "unit": "แผง", "orderQty": 100}]</script>
+
+  <script>
+    (function () {
+      // 1. Initial Data Parse
+      const rawDataEl = document.getElementById('app-data');
+      let initialData = [];
+      try {
+        const raw = JSON.parse(rawDataEl.textContent);
+        initialData = Array.isArray(raw) ? raw : [];
+      } catch (e) {
+        console.error("Failed parsing base dataset.", e);
+      }
+
+      // Active products array
+      let products = initialData.map(p => ({
+        no: Number(p.no) || 0,
+        code: String(p.code || '').trim(),
+        name: String(p.name || '').trim(),
+        max: Number(p.max) || 0,
+        min: Number(p.min) || 0,
+        stock: Number(p.stock) || 0,
+        lastBuy: Number(p.lastBuy) || 0,
+        unit: String(p.unit || '').trim(),
+        orderQty: Math.max(0, (Number(p.max) || 0) - (Number(p.min) || 0))
+      }));
+
+      // Persistent Quote Storage structure: { [productCode]: [ { company: "Company A", price: 10 }, ... ] }
+      let supplierQuotesMap = {};
+
+      // Retrieve previous entries from localStorage if available
+      try {
+        const savedQuotes = localStorage.getItem('pharmacy_supplier_quotes_v2');
+        if (savedQuotes) {
+          supplierQuotesMap = JSON.parse(savedQuotes);
+        }
+      } catch (e) {
+        console.warn("localStorage is not available or blocked in sandbox. Using in-memory state.", e);
+      }
+
+      // State variables
+      let selectedProductCode = null;
+      let sortCol = 'orderQty';
+      let sortDir = 'desc';
+
+      // UI Element Bindings
+      const fileInput = document.getElementById('fileInput');
+      const uploadZone = document.getElementById('uploadZone');
+      const uploadZoneTitle = document.getElementById('uploadZoneTitle');
+      const activeReportText = document.getElementById('activeReportText');
+      
+      const searchProductInput = document.getElementById('searchProductInput');
+      const autocompleteList = document.getElementById('autocompleteList');
+      const activeEditorSection = document.getElementById('activeEditorSection');
+      const editorEmptyState = document.getElementById('editorEmptyState');
+      const editMedTitle = document.getElementById('editMedTitle');
+      const editMedMeta = document.getElementById('editMedMeta');
+      const distributorRowsContainer = document.getElementById('distributorRowsContainer');
+      const addDistRowBtn = document.getElementById('addDistRowBtn');
+      const saveProductQuotesBtn = document.getElementById('saveProductQuotesBtn');
+      const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+      const supplierRecommendationsContainer = document.getElementById('supplierRecommendationsContainer');
+      const tableSearchInput = document.getElementById('tableSearchInput');
+      const statusFilter = document.getElementById('statusFilter');
+      const inventoryTableBody = document.getElementById('inventoryTableBody');
+
+      // Helper Formats
+      function formatNumber(n) {
+        return Number(n).toLocaleString('th-TH');
+      }
+
+      function formatCurrency(n) {
+        return Number(n).toLocaleString('th-TH', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      // --- 1. Autocomplete Search and Selection ---
+      searchProductInput.addEventListener('input', function() {
+        const query = this.value.trim().toLowerCase();
+        if (!query) {
+          autocompleteList.style.display = 'none';
+          return;
+        }
+
+        const matches = products.filter(p => 
+          p.code.toLowerCase().includes(query) || 
+          p.name.toLowerCase().includes(query)
+        ).slice(0, 8);
+
+        if (matches.length === 0) {
+          autocompleteList.innerHTML = `<div class="autocomplete-item" style="color:var(--muted); cursor: default;">ไม่พบรายการสินค้าที่ค้นหา</div>`;
+        } else {
+          autocompleteList.innerHTML = matches.map(p => `
+            <div class="autocomplete-item" data-code="${escapeHtml(p.code)}">
+              <strong>[${escapeHtml(p.code)}]</strong> ${escapeHtml(p.name)} 
+              <span style="color: var(--brand); font-size:12px;">(ต้องสั่ง ${formatNumber(p.orderQty)} ${escapeHtml(p.unit)})</span>
+            </div>
+          `).join('');
+        }
+        autocompleteList.style.display = 'block';
+      });
+
+      // Handle item click inside autocomplete dropdown
+      autocompleteList.addEventListener('click', function(e) {
+        const item = e.target.closest('.autocomplete-item');
+        if (!item || !item.dataset.code) return;
+        
+        loadProductIntoEditor(item.dataset.code);
+        autocompleteList.style.display = 'none';
+        searchProductInput.value = '';
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.product-select-wrapper') && e.target !== searchProductInput) {
+          autocompleteList.style.display = 'none';
+        }
+      });
+
+      // --- 2. Dynamic Distributor Price Editor ---
+      function loadProductIntoEditor(code) {
+        const prod = products.find(p => p.code === code);
+        if (!prod) return;
+
+        selectedProductCode = code;
+        editMedTitle.textContent = `[${prod.code}] ${prod.name}`;
+        editMedMeta.innerHTML = `
+          <span>ยอดคงเหลือ: <strong>${formatNumber(prod.stock)}</strong> ${escapeHtml(prod.unit)}</span> | 
+          <span>Stock Max: <strong>${formatNumber(prod.max)}</strong></span> | 
+          <span>Stock Min: <strong>${formatNumber(prod.min)}</strong></span> | 
+          <span class="pill-badge ${prod.orderQty > 0 ? 'saving-pill' : 'not-order-pill'}">
+            ยอดสั่งซื้อตามสูตร (Max-Min): <strong>${formatNumber(prod.orderQty)} ${escapeHtml(prod.unit)}</strong>
+          </span>
+        `;
+
+        // Clear and load existing quotes or start with one empty row
+        distributorRowsContainer.innerHTML = '';
+        const existingQuotes = supplierQuotesMap[code] || [];
+        
+        if (existingQuotes.length > 0) {
+          existingQuotes.forEach(q => {
+            addDistributorRow(q.company, q.price);
+          });
+        } else {
+          // Add two initial blank rows for convenience of comparison
+          addDistributorRow('', '');
+          addDistributorRow('', '');
+        }
+
+        editorEmptyState.style.display = 'none';
+        activeEditorSection.style.display = 'block';
+      }
+
+      function addDistributorRow(company = '', price = '') {
+        const row = document.createElement('div');
+        row.className = 'distributor-row';
+        row.innerHTML = `
+          <div>
+            <input type="text" class="dist-company" placeholder="ระบุชื่อผู้จัดจำหน่าย (เช่น ดีเคเอสเอช, ยี่ปั๊ว A)" value="${escapeHtml(company)}">
+          </div>
+          <div>
+            <input type="number" class="dist-price" placeholder="ราคาต้นทุน" step="0.01" min="0" value="${price}">
+          </div>
+          <div style="text-align: center;">
+            <button type="button" class="btn btn-danger btn-sm delete-row-btn" title="ลบผู้จัดจำหน่ายนี้">✕</button>
+          </div>
+        `;
+
+        // Handle delete row action
+        row.querySelector('.delete-row-btn').addEventListener('click', function() {
+          row.remove();
+          // Ensure we have at least one row if empty
+          if (distributorRowsContainer.children.length === 0) {
+            addDistributorRow('', '');
+          }
+        });
+
+        distributorRowsContainer.appendChild(row);
+      }
+
+      addDistRowBtn.addEventListener('click', () => {
+        addDistributorRow('', '');
+      });
+
+      cancelEditBtn.addEventListener('click', () => {
+        activeEditorSection.style.display = 'none';
+        editorEmptyState.style.display = 'block';
+        selectedProductCode = null;
+      });
+
+      saveProductQuotesBtn.addEventListener('click', () => {
+        if (!selectedProductCode) return;
+
+        const rows = distributorRowsContainer.querySelectorAll('.distributor-row');
+        const newQuotes = [];
+
+        rows.forEach(r => {
+          const compVal = r.querySelector('.dist-company').value.trim();
+          const priceVal = parseFloat(r.querySelector('.dist-price').value);
+
+          if (compVal && !isNaN(priceVal) && priceVal >= 0) {
+            newQuotes.push({
+              company: compVal,
+              price: priceVal
+            });
+          }
+        });
+
+        // Save into global state (even if empty, which means deleting all suppliers of this product)
+        if (newQuotes.length > 0) {
+          supplierQuotesMap[selectedProductCode] = newQuotes;
+        } else {
+          delete supplierQuotesMap[selectedProductCode];
+        }
+
+        // Persist quotes in localStorage
+        try {
+          localStorage.setItem('pharmacy_supplier_quotes_v2', JSON.stringify(supplierQuotesMap));
+        } catch (e) {
+          console.warn("Could not write to localStorage.", e);
+        }
+
+        // Close editor, reset selected code
+        activeEditorSection.style.display = 'none';
+        editorEmptyState.style.display = 'block';
+        selectedProductCode = null;
+
+        // Render recalculated screens
+        renderAll();
+      });
+
+
+      // --- 3. Dynamic Calculation & Aggregations ---
+      function getCalculations() {
+        // Group the best/lowest supplier recommendations
+        const supplierGroups = {};
+
+        // Process all active items
+        const enrichedItems = products.map(item => {
+          const quotes = supplierQuotesMap[item.code] || [];
+          let bestQuote = null;
+          let sortedQuotes = [];
+
+          if (quotes.length > 0) {
+            // Sort to find the cheapest supplier
+            sortedQuotes = [...quotes].sort((a, b) => a.price - b.price);
+            bestQuote = sortedQuotes[0];
+          }
+
+          const orderQty = item.orderQty;
+          const bestCost = bestQuote ? bestQuote.price : null;
+          const totalCost = bestCost !== null ? orderQty * bestCost : null;
+
+          // Calculate savings if multiple quotes exist
+          let savedAmount = 0;
+          if (sortedQuotes.length > 1 && orderQty > 0) {
+            const worstQuote = sortedQuotes[sortedQuotes.length - 1];
+            savedAmount = orderQty * Math.max(0, worstQuote.price - bestQuote.price);
+          }
+
+          // If the item needs ordering, accumulate into the supplier group recommendation
+          if (bestQuote && orderQty > 0) {
+            const sName = bestQuote.company;
+            if (!supplierGroups[sName]) {
+              supplierGroups[sName] = {
+                company: sName,
+                items: [],
+                totalPurchase: 0,
+                totalSaved: 0
+              };
+            }
+            supplierGroups[sName].items.push({
+              productCode: item.code,
+              productName: item.name,
+              orderQty: orderQty,
+              unit: item.unit,
+              price: bestQuote.price,
+              total: totalCost,
+              saved: savedAmount
+            });
+            supplierGroups[sName].totalPurchase += totalCost;
+            supplierGroups[sName].totalSaved += savedAmount;
+          }
+
+          return {
+            ...item,
+            quotes: sortedQuotes,
+            bestQuote,
+            bestCost,
+            totalCost
+          };
+        });
+
+        return { enrichedItems, supplierGroups };
+      }
+
+      // Render the aggregated recommended distributor purchase groups
+      function renderSupplierPlans(supplierGroups) {
+        const groups = Object.values(supplierGroups).sort((a, b) => b.totalPurchase - a.totalPurchase);
+
+        if (groups.length === 0) {
+          supplierRecommendationsContainer.innerHTML = `
+            <div class="empty-state">
+              <strong>ยังไม่มีแผนคำแนะนำเปรียบเทียบราคา</strong>
+              เมื่อคุณทำากรเลือกยาแล้วระบุข้อมูลราคาสินค้า ระบบจะนำข้อมูลมาวิเคราะห์จัดกลุ่มและแนะนำบริษัทผู้จำหน่ายที่คุ้มค่าที่สุดที่นี่ให้คุณโดยอัตโนมัติ
+            </div>
+          `;
+          return;
+        }
+
+        supplierRecommendationsContainer.innerHTML = groups.map(g => {
+          const itemRows = g.items.map(entry => `
+            <tr>
+              <td>
+                <div style="font-weight:600; color: var(--ink);">${escapeHtml(entry.productName)}</div>
+                <div class="code-text">${escapeHtml(entry.productCode)}</div>
+              </td>
+              <td class="num"><strong>${formatNumber(entry.orderQty)}</strong> ${escapeHtml(entry.unit)}</td>
+              <td class="num">${formatCurrency(entry.price)}</td>
+              <td class="num"><strong>${formatCurrency(entry.total)}</strong></td>
+              <td>
+                ${entry.saved > 0 ? `<span class="pill-badge saving-pill">ประหยัด ${formatCurrency(entry.saved)} ฿</span>` : `<span style="font-size:12px; color: var(--muted);">ราคาดีที่สุด</span>`}
+              </td>
+            </tr>
+          `).join('');
+
+          return `
+            <div class="supplier-summary-card">
+              <div class="supplier-summary-header">
+                <span class="supplier-name">สั่งซื้อกับ: ${escapeHtml(g.company)}</span>
+                <div class="supplier-totals">
+                  <span>ยอดสั่งซื้อรวม: <strong style="color:var(--brand);">${formatCurrency(g.totalPurchase)} บาท</strong></span>
+                  ${g.totalSaved > 0 ? `<span class="pill-badge saving-pill">เซฟค่าใช้จ่ายได้ ${formatCurrency(g.totalSaved)} บาท</span>` : ''}
+                </div>
+              </div>
+              <div class="table-wrapper" style="border:none; border-radius:0;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>รายการเวชภัณฑ์</th>
+                      <th class="num">จำนวนสั่งซื้อ</th>
+                      <th class="num">ราคาต่ำสุด/หน่วย</th>
+                      <th class="num">รวม (บาท)</th>
+                      <th>การประหยัดต้นทุน</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${itemRows}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Render inventory & calculation main table
+      function renderInventoryTable(enrichedItems) {
+        const query = tableSearchInput.value.trim().toLowerCase();
+        const status = statusFilter.value;
+
+        // Apply dynamic filters
+        let filtered = enrichedItems.filter(row => {
+          if (query) {
+            const matchName = row.name.toLowerCase().includes(query);
+            const matchCode = row.code.toLowerCase().includes(query);
+            const matchSupplier = row.quotes.some(q => q.company.toLowerCase().includes(query));
+            if (!matchName && !matchCode && !matchSupplier) return false;
+          }
+
+          if (status === 'need_order' && row.orderQty <= 0) return false;
+          if (status === 'has_quotes' && row.quotes.length === 0) return false;
+          if (status === 'no_quotes' && row.quotes.length > 0) return false;
+
+          return true;
+        });
+
+        // Apply sorting
+        filtered.sort((a, b) => {
+          let valA = a[sortCol];
+          let valB = b[sortCol];
+
+          if (sortCol === 'bestCost' || sortCol === 'totalCost') {
+            if (valA === null && valB === null) return a.no - b.no;
+            if (valA === null) return 1;
+            if (valB === null) return -1;
+          }
+
+          if (typeof valA === 'string') {
+            const comp = valA.localeCompare(valB, 'th');
+            return sortDir === 'asc' ? comp : -comp;
+          } else {
+            const diff = (Number(valA) || 0) - (Number(valB) || 0);
+            return sortDir === 'asc' ? diff : -diff;
+          }
+        });
+
+        // Set sort header UI indicator
+        document.querySelectorAll('.sort-ind').forEach(el => {
+          const col = el.getAttribute('data-col');
+          if (col === sortCol) {
+            el.textContent = sortDir === 'asc' ? '▲' : '▼';
+          } else {
+            el.textContent = '';
+          }
+        });
+
+        if (filtered.length === 0) {
+          inventoryTableBody.innerHTML = `
+            <tr>
+              <td colspan="12">
+                <div class="empty-state" style="border:none;">
+                  <strong>ไม่พบรายการสินค้าที่ตรงเงื่อนไข</strong>
+                  ลองใช้คำค้นหาอื่น หรือตรวจสอบตัวกรองสถานะด้านบน
+                </div>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        inventoryTableBody.innerHTML = filtered.map(row => {
+          const isNeedOrder = row.orderQty > 0;
+          const qtyBadgeClass = isNeedOrder ? 'qty-badge qty-positive' : 'qty-badge qty-zero';
+
+          // Render comparison chips of different distributors
+          let supplierComparisonsHtml = `<span class="no-quote-tag">ยังไม่มีการกรอกราคา</span>`;
+          if (row.quotes.length > 0) {
+            const quotesHtml = row.quotes.map((q, idx) => {
+              const isWinner = idx === 0;
+              return `
+                <div class="comparison-item ${isWinner ? 'cheapest' : ''}">
+                  <span>${isWinner ? '🏆 ' : ''}${escapeHtml(q.company)}</span>
+                  <span><strong>${formatCurrency(q.price)} ฿</strong></span>
+                </div>
+              `;
+            }).join('');
+            supplierComparisonsHtml = `<div class="comparison-container">${quotesHtml}</div>`;
+          }
+
+          return `
+            <tr class="${row.bestQuote ? 'highlight-row' : ''}">
+              <td class="num">${row.no}</td>
+              <td class="code-text">${escapeHtml(row.code)}</td>
+              <td>
+                <strong style="color: var(--ink);">${escapeHtml(row.name)}</strong>
+              </td>
+              <td class="num">${formatNumber(row.stock)}</td>
+              <td class="num">${formatNumber(row.max)}</td>
+              <td class="num">${formatNumber(row.min)}</td>
+              <td class="num"><span class="${qtyBadgeClass}">${formatNumber(row.orderQty)}</span></td>
+              <td>${escapeHtml(row.unit)}</td>
+              <td>${supplierComparisonsHtml}</td>
+              <td class="num success-text">${row.bestCost !== null ? formatCurrency(row.bestCost) + ' ฿' : '—'}</td>
+              <td class="num" style="font-weight:700;">${row.totalCost !== null ? formatCurrency(row.totalCost) + ' ฿' : '—'}</td>
+              <td style="text-align: center;">
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  data-edit-code="${escapeHtml(row.code)}"
+                  title="กรอกราคาผู้จัดจำหน่ายรายต่าง ๆ"
+                >
+                  กรอก/แก้ไขราคา
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        // Wire up individual "กรอก/แก้ไขราคา" buttons
+        inventoryTableBody.querySelectorAll('[data-edit-code]').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const code = this.getAttribute('data-edit-code');
+            loadProductIntoEditor(code);
+            
+            // Scroll to the active editor smoothly
+            document.getElementById('priceEditorHeading').scrollIntoView({
+              behavior: 'smooth',
+              block: 'center'
+            });
+          });
+        });
+      }
+
+      // Column Sorting listeners
+      document.querySelectorAll('th.sortable').forEach(th => {
+        th.addEventListener('click', function() {
+          const col = this.getAttribute('data-sort');
+          if (sortCol === col) {
+            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+          } else {
+            sortCol = col;
+            sortDir = (col === 'name' || col === 'code' || col === 'no') ? 'asc' : 'desc';
+          }
+          const { enrichedItems } = getCalculations();
+          renderInventoryTable(enrichedItems);
+        });
+      });
+
+      tableSearchInput.addEventListener('input', () => {
+        const { enrichedItems } = getCalculations();
+        renderInventoryTable(enrichedItems);
+      });
+
+      statusFilter.addEventListener('change', () => {
+        const { enrichedItems } = getCalculations();
+        renderInventoryTable(enrichedItems);
+      });
+
+
+      // --- 4. Excel/CSV File Upload and Parsing ---
+      function handleFileUpload(file) {
+        if (!file) return;
+
+        uploadZoneTitle.textContent = `⏳ กำลังอ่านและวิเคราะห์ไฟล์: ${file.name}...`;
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          try {
+            const data = evt.target.result;
+            const workbook = XLSX.read(data, { type: 'binary' });
+            
+            // Try sheet matching
+            let sheetName = workbook.SheetNames[0];
+            // If "รายงานสินค้าใกล้หมด" is found, use it
+            const matchedName = workbook.SheetNames.find(n => n.includes('รายงานสินค้าใกล้หมด') || n.includes('Sheet1'));
+            if (matchedName) sheetName = matchedName;
+
+            const sheet = workbook.Sheets[sheetName];
+            // Convert to 2D Array
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+            // Find header row containing 'รหัสสินค้า' and 'Stock Max'
+            let headerIdx = -1;
+            for (let i = 0; i < rows.length; i++) {
+              const row = rows[i];
+              if (row) {
+                const rowStr = JSON.stringify(row);
+                if (rowStr.includes('รหัสสินค้า') && (rowStr.includes('Stock Max') || rowStr.includes('Stock Min') || rowStr.includes('คงเหลือ'))) {
+                  headerIdx = i;
+                  break;
+                }
+              }
+            }
+
+            if (headerIdx === -1) {
+              // Try backup lookup with standard headers
+              for (let i = 0; i < rows.length; i++) {
+                const rStr = JSON.stringify(rows[i] || []);
+                if (rStr.includes('สินค้า') && (rStr.includes('คงเหลือ') || rStr.includes('Max'))) {
+                  headerIdx = i;
+                  break;
+                }
+              }
+            }
+
+            if (headerIdx === -1) {
+              alert("ไม่สามารถค้นหาบรรทัดหัวตารางข้อมูลในไฟล์นี้ได้ กรุณาตรวจสอบรหัสสินค้าและข้อมูลหัวตาราง");
+              uploadZoneTitle.textContent = "ลากไฟล์รายงานที่ต้องการอัปโหลดมาที่นี่ หรือคลิกเพื่อเลือกไฟล์";
+              return;
+            }
+
+            const headerRow = rows[headerIdx];
+            
+            // Map indexes defensively
+            const colIndex = {
+              no: headerRow.findIndex(h => { const s = String(h || '').toLowerCase(); return s.includes('no') || s.includes('ลำดับ'); }),
+              code: headerRow.findIndex(h => { const s = String(h || '').toLowerCase(); return s.includes('รหัสสินค้า') || s === 'รหัส'; }),
+              name: headerRow.findIndex(h => { const s = String(h || '').toLowerCase(); return (s.includes('สินค้า') && !s.includes('รหัส')) || s.includes('รายการ') || s === 'สินค้า'; }),
+              max: headerRow.findIndex(h => { const s = String(h || '').toLowerCase(); return s.includes('stock max') || s.includes('max'); }),
+              min: headerRow.findIndex(h => { const s = String(h || '').toLowerCase(); return s.includes('stock min') || s.includes('min'); }),
+              stock: headerRow.findIndex(h => { const s = String(h || '').toLowerCase(); return s.includes('ยอดคงเหลือ') || s.includes('คงเหลือ'); }),
+              lastBuy: headerRow.findIndex(h => { const s = String(h || '').toLowerCase(); return s.includes('ซื้อล่าสุด') || s.includes('จำนวนซื้อ'); }),
+              unit: headerRow.findIndex(h => { const s = String(h || '').toLowerCase(); return s.includes('หน่วย'); })
+            };
+
+            const parsedProducts = [];
+            for (let i = headerIdx + 1; i < rows.length; i++) {
+              const row = rows[i];
+              if (!row || row.length < 3) continue;
+
+              const code = String(row[colIndex.code] || '').trim();
+              const name = String(row[colIndex.name] || '').trim();
+              if (!code || !name) continue;
+
+              const max = Number(row[colIndex.max]) || 0;
+              const min = Number(row[colIndex.min]) || 0;
+              const stock = Number(row[colIndex.stock]) || 0;
+              const lastBuy = Number(row[colIndex.lastBuy]) || 0;
+              const unit = String(row[colIndex.unit] || 'หน่วย').trim();
+
+              parsedProducts.push({
+                no: Number(row[colIndex.no]) || (parsedProducts.length + 1),
+                code: code,
+                name: name,
+                max: max,
+                min: min,
+                stock: stock,
+                lastBuy: lastBuy,
+                unit: unit,
+                orderQty: Math.max(0, max - min)
+              });
+            }
+
+            if (parsedProducts.length === 0) {
+              alert("ไม่พบสินค้าที่สมบูรณ์ในไฟล์รายงานนี้");
+              uploadZoneTitle.textContent = "ลากไฟล์รายงานที่ต้องการอัปโหลดมาที่นี่ หรือคลิกเพื่อเลือกไฟล์";
+              return;
+            }
+
+            // Successfully loaded new product list!
+            products = parsedProducts;
+            activeReportText.textContent = `ไฟล์รายงานปัจจุบัน: ${file.name} (${products.length} รายการ)`;
+            uploadZoneTitle.textContent = `✅ อัปโหลดไฟล์เรียบร้อยแล้ว: ${file.name}`;
+            
+            // Re-populate and render everything
+            populateMedicineDatalist();
+            cancelEditBtn.click(); // Close active editor to prevent mismatch
+            renderAll();
+
+          } catch (error) {
+            console.error(error);
+            alert("เกิดข้อผิดพลาดในการวิเคราะห์ไฟล์ กรุณาอัปโหลดไฟล์ที่ถูกต้องตามรูปแบบของฟาร์มาซี");
+            uploadZoneTitle.textContent = "ลากไฟล์รายงานที่ต้องการอัปโหลดมาที่นี่ หรือคลิกเพื่อเลือกไฟล์";
+          }
+        };
+
+        reader.onerror = function() {
+          alert("ไม่สามารถอ่านไฟล์ได้");
+          uploadZoneTitle.textContent = "ลากไฟล์รายงานที่ต้องการอัปโหลดมาที่นี่ หรือคลิกเพื่อเลือกไฟล์";
+        };
+
+        reader.readAsBinaryString(file);
+      }
+
+      fileInput.addEventListener('change', function(e) {
+        const file = e.target.files && e.target.files[0];
+        handleFileUpload(file);
+      });
+
+      // Handle Drag & Drop events
+      ['dragenter', 'dragover'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          uploadZone.style.borderColor = "var(--brand)";
+          uploadZone.style.background = "var(--brand-soft)";
+        }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          uploadZone.style.borderColor = "var(--border-strong)";
+          uploadZone.style.background = "var(--surface-subtle)";
+        }, false);
+      });
+
+      uploadZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const file = dt.files && dt.files[0];
+        handleFileUpload(file);
+      });
+
+
+      // --- 5. Initial setup and datalist population ---
+      function populateMedicineDatalist() {
+        // Automatically handled by our beautiful inline autocomplete component now, so datalist is fully managed.
+      }
+
+      function renderAll() {
+        const { enrichedItems, supplierGroups } = getCalculations();
+        renderSupplierPlans(supplierGroups);
+        renderInventoryTable(enrichedItems);
+      }
+
+      // Perform initial render
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
