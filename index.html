@@ -772,6 +772,17 @@
           <!-- Dynamically populated recommended purchases grouped by cheapest vendor -->
         </div>
       </section>
+
+      <!-- New Card: Tied Prices -->
+      <section class="card" aria-labelledby="tiedHeading">
+        <div class="card-header">
+          <h2 class="card-title" id="tiedHeading">⚖️ รายการสินค้าที่ผู้เสนอราคาต่ำสุดเท่ากัน (รอตัดสินใจเลือก)</h2>
+          <p class="card-subtitle">แสดงสินค้าที่มีบริษัทเสนอราคาถูกที่สุดเท่ากันตั้งแต่ 2 รายขึ้นไป เพื่อให้ท่านเลือกผู้จัดจำหน่ายด้วยตนเองภายหลัง</p>
+        </div>
+        <div id="tiedLowestPricesContainer">
+          <!-- Dynamically populated list of tied items -->
+        </div>
+      </section>
     </div>
 
     <!-- Main Full-Width Table Section -->
@@ -913,6 +924,25 @@
         }
       } catch (e) {
         console.warn("localStorage is not available or blocked in sandbox. Using in-memory state.", e);
+      }
+
+      // Persistent Tied Supplier Selection structure: { [productCode]: "Selected Company Name" }
+      let selectedTiedSuppliersMap = {};
+      try {
+        const savedSelections = localStorage.getItem('pharmacy_selected_tied_suppliers_v2');
+        if (savedSelections) {
+          selectedTiedSuppliersMap = JSON.parse(savedSelections);
+        }
+      } catch (e) {
+        console.warn("Could not read tied supplier selections from localStorage", e);
+      }
+
+      function saveTiedSelectionsState() {
+        try {
+          localStorage.setItem('pharmacy_selected_tied_suppliers_v2', JSON.stringify(selectedTiedSuppliersMap));
+        } catch (e) {
+          console.warn("Could not write tied supplier selections to localStorage", e);
+        }
       }
 
       // State variables
@@ -1168,6 +1198,7 @@
       function getCalculations() {
         // Group the best/lowest supplier recommendations
         const supplierGroups = {};
+        const tiedItemsList = [];
 
         // Process all active items
         const enrichedItems = products.map(item => {
@@ -1178,16 +1209,57 @@
           if (quotes.length > 0) {
             // Sort to find the cheapest supplier
             sortedQuotes = [...quotes].sort((a, b) => a.price - b.price);
-            bestQuote = sortedQuotes[0];
           }
 
           const orderQty = item.orderQty;
-          const bestCost = bestQuote ? bestQuote.price : null;
-          const totalCost = bestCost !== null ? orderQty * bestCost : null;
+          let bestCost = null;
+          let totalCost = null;
+          let isTied = false;
+          let tiedCompanies = [];
 
-          // Calculate savings if multiple quotes exist
+          if (sortedQuotes.length > 0) {
+            const lowestPrice = sortedQuotes[0].price;
+            const tiedQuotes = sortedQuotes.filter(q => q.price === lowestPrice);
+
+            if (tiedQuotes.length >= 2 && orderQty > 0) {
+              isTied = true;
+              tiedCompanies = tiedQuotes.map(q => q.company);
+
+              // Check if user has already made a selection for this tied product
+              const userSelection = selectedTiedSuppliersMap[item.code];
+              if (userSelection && tiedCompanies.includes(userSelection)) {
+                // User has chosen! Use this selection
+                bestQuote = tiedQuotes.find(q => q.company === userSelection);
+                bestCost = bestQuote.price;
+                totalCost = orderQty * bestCost;
+              } else {
+                // No selection yet. This is a pending tie!
+                bestQuote = null;
+                bestCost = lowestPrice; // show the tied lowest cost in the table
+                totalCost = null;       // total is null because no company is chosen yet
+              }
+
+              tiedItemsList.push({
+                code: item.code,
+                name: item.name,
+                orderQty: orderQty,
+                unit: item.unit,
+                price: lowestPrice,
+                companies: tiedCompanies,
+                selection: userSelection || null
+              });
+
+            } else {
+              // Not a tie
+              bestQuote = sortedQuotes[0];
+              bestCost = bestQuote ? bestQuote.price : null;
+              totalCost = bestCost !== null ? orderQty * bestCost : null;
+            }
+          }
+
+          // Calculate savings if multiple quotes exist and we have chosen/assigned a winner
           let savedAmount = 0;
-          if (sortedQuotes.length > 1 && orderQty > 0) {
+          if (sortedQuotes.length > 1 && orderQty > 0 && bestQuote) {
             const worstQuote = sortedQuotes[sortedQuotes.length - 1];
             savedAmount = orderQty * Math.max(0, worstQuote.price - bestQuote.price);
           }
@@ -1221,11 +1293,13 @@
             quotes: sortedQuotes,
             bestQuote,
             bestCost,
-            totalCost
+            totalCost,
+            isTied,
+            tiedCompanies
           };
         });
 
-        return { enrichedItems, supplierGroups };
+        return { enrichedItems, supplierGroups, tiedItemsList };
       }
 
       // Render the aggregated recommended distributor purchase groups
@@ -1286,6 +1360,100 @@
             </div>
           `;
         }).join('');
+      }
+
+      // Render tied lowest price items list
+      function renderTiedItems(tiedItems) {
+        const container = document.getElementById('tiedLowestPricesContainer');
+        if (tiedItems.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <strong>ไม่มีรายการสินค้าที่ราคาเท่ากัน</strong>
+              ทุกรายการที่มีข้อมูลราคา มีบริษัทที่เสนอราคาเสนอต่ำสุดเป็นผู้ชนะเพียงเจ้าเดียวอย่างชัดเจน
+            </div>
+          `;
+          return;
+        }
+
+        const rowsHtml = tiedItems.map(entry => {
+          let compBadges = '';
+          
+          if (entry.selection) {
+            compBadges = `
+              <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
+                <span style="color: var(--success); font-weight: 700; font-size: 13.5px; display: inline-flex; align-items: center; gap: 4px;">
+                  ✓ เลือกสั่งจาก: <strong style="text-decoration: underline;">${escapeHtml(entry.selection)}</strong>
+                </span>
+                <button type="button" class="btn btn-danger btn-sm reset-tied-btn" data-code="${escapeHtml(entry.code)}" style="padding: 2px 8px; font-size: 12px;" title="คลิกเพื่อยกเลิกตัวเลือกและตัดสินใจใหม่">
+                  ยกเลิกตัวเลือก
+                </button>
+              </div>
+            `;
+          } else {
+            compBadges = `
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                ${entry.companies.map(c => `
+                  <button type="button" class="btn btn-secondary btn-sm select-tied-btn" data-code="${escapeHtml(entry.code)}" data-company="${escapeHtml(c)}" style="border-color: var(--brand); color: var(--brand); padding: 4px 10px; font-size: 13px;" title="คลิกเลือกสั่งซื้อยาตัวนี้จาก ${escapeHtml(c)}">
+                    🏢 ${escapeHtml(c)}
+                  </button>
+                `).join('')}
+              </div>
+            `;
+          }
+
+          return `
+            <tr>
+              <td>
+                <div style="font-weight:700; color: var(--ink);">${escapeHtml(entry.name)}</div>
+                <div class="code-text">${escapeHtml(entry.code)}</div>
+              </td>
+              <td class="num"><strong>${formatNumber(entry.orderQty)}</strong> ${escapeHtml(entry.unit)}</td>
+              <td class="num" style="color: var(--success); font-weight:700; font-size:14.5px;">${formatCurrency(entry.price)} ฿</td>
+              <td>
+                ${compBadges}
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        container.innerHTML = `
+          <div class="table-wrapper" style="border-radius: var(--radius-sm); border: 1px solid var(--border);">
+            <table>
+              <thead>
+                <tr>
+                  <th>รายการสินค้า</th>
+                  <th class="num">ต้องสั่ง</th>
+                  <th class="num">ราคาต่ำสุดต่อหน่วย</th>
+                  <th>บริษัทผู้เสนอราคาต่ำสุดเท่ากัน (คลิกที่ชื่อบริษัทเพื่อเลือกตัดสินใจสั่งซื้อ)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        `;
+
+        // Bind selection buttons
+        container.querySelectorAll('.select-tied-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const code = this.getAttribute('data-code');
+            const comp = this.getAttribute('data-company');
+            selectedTiedSuppliersMap[code] = comp;
+            saveTiedSelectionsState();
+            renderAll();
+          });
+        });
+
+        // Bind reset buttons
+        container.querySelectorAll('.reset-tied-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const code = this.getAttribute('data-code');
+            delete selectedTiedSuppliersMap[code];
+            saveTiedSelectionsState();
+            renderAll();
+          });
+        });
       }
 
       // Render inventory & calculation main table
@@ -1361,7 +1529,7 @@
           let supplierComparisonsHtml = `<span class="no-quote-tag">ยังไม่มีการกรอกราคา</span>`;
           if (row.quotes.length > 0) {
             const quotesHtml = row.quotes.map((q, idx) => {
-              const isWinner = idx === 0;
+              const isWinner = row.bestQuote ? (q.company === row.bestQuote.company) : false;
               return `
                 <div class="comparison-item ${isWinner ? 'cheapest' : ''}">
                   <span>${isWinner ? '🏆 ' : ''}${escapeHtml(q.company)}</span>
@@ -1369,7 +1537,16 @@
                 </div>
               `;
             }).join('');
-            supplierComparisonsHtml = `<div class="comparison-container">${quotesHtml}</div>`;
+            
+            let statusBanner = '';
+            if (row.isTied) {
+              if (row.bestQuote) {
+                statusBanner = `<div style="font-size:12.5px; color:var(--success); font-weight:700; margin-bottom: 4px;">✓ เลือกสั่งจาก: ${escapeHtml(row.bestQuote.company)}</div>`;
+              } else {
+                statusBanner = `<div style="font-size:12.5px; color:var(--warning); font-weight:700; margin-bottom: 4px;">⚖️ ต่ำสุดเท่ากัน (รอตัดสินใจเลือก)</div>`;
+              }
+            }
+            supplierComparisonsHtml = `${statusBanner}<div class="comparison-container">${quotesHtml}</div>`;
           }
 
           return `
@@ -1707,8 +1884,9 @@
       }
 
       function renderAll() {
-        const { enrichedItems, supplierGroups } = getCalculations();
+        const { enrichedItems, supplierGroups, tiedItemsList } = getCalculations();
         renderSupplierPlans(supplierGroups);
+        renderTiedItems(tiedItemsList);
         renderInventoryTable(enrichedItems);
       }
 
