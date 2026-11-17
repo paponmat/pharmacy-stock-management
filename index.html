@@ -721,6 +721,19 @@
             <option value="no_quotes">เฉพาะรายการที่ยังไม่มีการระบุราคาผู้จำหน่าย</option>
           </select>
         </div>
+
+        <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center;">
+          <button type="button" class="btn btn-secondary btn-sm" id="restoreOrdersBtn" style="display: none; border-color: var(--brand); color: var(--brand);" title="คืนค่าจำนวนสั่งตามสูตรเดิม (Max - Min)">
+            ↩️ คืนค่าจำนวนสั่งตามสูตร
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" id="clearOrdersBtn" style="border-color: var(--danger); color: var(--danger);" title="ล้างจำนวนที่ต้องสั่งซื้อทั้งหมดให้เป็น 0 เมื่อทำรายการเสร็จสิ้นแล้ว">
+            🗑️ ล้างรายการสั่งซื้อ (เสร็จสิ้น)
+          </button>
+          <label class="btn btn-primary btn-sm" style="margin: 0; cursor: pointer;" title="คลิกเพื่อเลือกอัปโหลดไฟล์รายงานชุดใหม่เพื่ออัปเดตทันที">
+            📥 อัปโหลดรายงานใหม่
+            <input type="file" id="tableFileInput" accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display: none;">
+          </label>
+        </div>
       </div>
 
       <div class="table-wrapper">
@@ -819,6 +832,9 @@
       const tableSearchInput = document.getElementById('tableSearchInput');
       const statusFilter = document.getElementById('statusFilter');
       const inventoryTableBody = document.getElementById('inventoryTableBody');
+      const clearOrdersBtn = document.getElementById('clearOrdersBtn');
+      const restoreOrdersBtn = document.getElementById('restoreOrdersBtn');
+      const tableFileInput = document.getElementById('tableFileInput');
 
       // Helper Formats
       function formatNumber(n) {
@@ -1274,6 +1290,30 @@
         renderInventoryTable(enrichedItems);
       });
 
+      // Clear all active orders (session only)
+      clearOrdersBtn.addEventListener('click', () => {
+        products.forEach(p => {
+          p.orderQty = 0;
+        });
+        restoreOrdersBtn.style.display = 'inline-flex';
+        renderAll();
+      });
+
+      // Restore order quantities based on Formula (Max - Min)
+      restoreOrdersBtn.addEventListener('click', () => {
+        products.forEach(p => {
+          p.orderQty = Math.max(0, p.max - p.min);
+        });
+        restoreOrdersBtn.style.display = 'none';
+        renderAll();
+      });
+
+      // Secondary file upload element next to the table
+      tableFileInput.addEventListener('change', e => {
+        const file = e.target.files && e.target.files[0];
+        handleFileUpload(file);
+      });
+
 
       // --- 4. Excel/CSV File Upload and Parsing ---
       function handleFileUpload(file) {
@@ -1383,6 +1423,7 @@
             // Re-populate and render everything
             populateMedicineDatalist();
             cancelEditBtn.click(); // Close active editor to prevent mismatch
+            restoreOrdersBtn.style.display = 'none';
             renderAll();
 
           } catch (error) {
