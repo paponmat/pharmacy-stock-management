@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ระบบคำนวณยอดสั่งซื้อยาและเปรียบเทียบต้นทุน — สบายดีฟาร์มาซี</title>
+  <title>ระบบคำนวณยอดสั่งซื้อยาและเปรียบเทียบต้นทุน</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -57,11 +57,11 @@
     .app-header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: var(--space-5) var(--space-6);
+      padding: var(--space-4) var(--space-6);
     }
 
     .header-inner {
-      max-width: 1400px;
+      max-width: 1440px;
       margin: 0 auto;
       display: flex;
       flex-wrap: wrap;
@@ -72,7 +72,7 @@
 
     .header-title-group h1 {
       margin: 0;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--ink);
       letter-spacing: -0.01em;
@@ -81,7 +81,7 @@
     .header-meta {
       margin-top: var(--space-1);
       color: var(--muted);
-      font-size: 14px;
+      font-size: 13.5px;
       display: flex;
       flex-wrap: wrap;
       gap: var(--space-3);
@@ -97,23 +97,23 @@
       background: var(--brand-soft);
       color: var(--brand);
       font-weight: 600;
-      font-size: 13px;
+      font-size: 12.5px;
     }
 
     .container {
-      max-width: 1400px;
+      max-width: 1440px;
       margin: 0 auto;
-      padding: var(--space-6);
+      padding: var(--space-5);
       display: flex;
       flex-direction: column;
-      gap: var(--space-6);
+      gap: var(--space-5);
     }
 
-    /* Layout Grid */
+    /* Top Grid Layout */
     .top-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: var(--space-6);
+      gap: var(--space-5);
     }
 
     @media (min-width: 1024px) {
@@ -128,7 +128,7 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: var(--space-6);
+      padding: var(--space-5);
     }
 
     .card-header {
@@ -140,7 +140,7 @@
 
     .card-title {
       margin: 0;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 700;
       color: var(--ink);
       display: flex;
@@ -150,15 +150,33 @@
 
     .card-subtitle {
       margin: 0;
-      font-size: 13.5px;
+      font-size: 13px;
       color: var(--muted);
+    }
+
+    /* Tab styles */
+    .tab-btn {
+      border: 1px solid transparent;
+      background: transparent;
+      padding: 8px 16px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-btn.active {
+      border-color: var(--border) var(--border) transparent var(--border) !important;
+      background: var(--surface) !important;
+      color: var(--brand) !important;
+      border-bottom: 2px solid var(--brand) !important;
     }
 
     /* Upload Area */
     .upload-zone {
       border: 2px dashed var(--border-strong);
       border-radius: var(--radius);
-      padding: var(--space-5) var(--space-4);
+      padding: var(--space-4);
       text-align: center;
       background: var(--surface-subtle);
       cursor: pointer;
@@ -182,20 +200,43 @@
     }
 
     .upload-icon {
-      font-size: 32px;
-      margin-bottom: var(--space-2);
+      font-size: 28px;
+      margin-bottom: var(--space-1);
       color: var(--brand);
     }
 
     .upload-title {
       font-weight: 700;
+      font-size: 14px;
       color: var(--ink);
-      margin-bottom: var(--space-1);
+      margin-bottom: 2px;
     }
 
     .upload-desc {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--muted);
+    }
+
+    /* Distributor list manager */
+    .distributor-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+    .distributor-badge .remove-btn {
+      cursor: pointer;
+      font-weight: bold;
+      color: var(--muted);
+      transition: color 0.12s;
+    }
+    .distributor-badge .remove-btn:hover {
+      color: var(--danger);
     }
 
     /* Distributor input row builder */
@@ -203,10 +244,6 @@
       display: flex;
       flex-direction: column;
       gap: var(--space-4);
-    }
-
-    .product-select-wrapper {
-      position: relative;
     }
 
     .distributor-list-container {
@@ -230,19 +267,11 @@
       align-items: center;
     }
 
-    @media (max-width: 480px) {
-      .distributor-row {
-        grid-template-columns: 1fr;
-        border-bottom: 1px solid var(--border);
-        padding-bottom: var(--space-3);
-      }
-    }
-
     /* Buttons */
     .btn {
       font: inherit;
       font-weight: 600;
-      padding: 10px 16px;
+      padding: 8px 14px;
       border-radius: var(--radius-sm);
       border: 1px solid transparent;
       cursor: pointer;
@@ -276,21 +305,9 @@
       background: var(--surface-subtle);
     }
 
-    .btn-text-accent {
-      background: transparent;
-      color: var(--brand);
-      font-size: 14px;
-      padding: var(--space-1) var(--space-2);
-    }
-
-    .btn-text-accent:hover {
-      background: var(--brand-soft);
-    }
-
     .btn-danger {
       background: var(--danger-soft);
       color: var(--danger);
-      border-color: transparent;
     }
 
     .btn-danger:hover {
@@ -298,19 +315,19 @@
     }
 
     .btn-sm {
-      padding: 6px 12px;
-      font-size: 13.5px;
+      padding: 5px 10px;
+      font-size: 13px;
       border-radius: 6px;
     }
 
-    /* Autocomplete / Input Styles */
+    /* Form Fields */
     input[type="text"],
     input[type="number"],
     input[type="search"],
     select {
       width: 100%;
       font: inherit;
-      padding: 10px 12px;
+      padding: 8px 10px;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border-strong);
       background: var(--surface);
@@ -327,30 +344,30 @@
 
     .field-label {
       display: block;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 600;
       color: var(--ink);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
-    /* Selected Med Detail Info */
+    /* Selected Med Banner */
     .selected-med-banner {
       background: var(--brand-soft);
       border: 1px solid rgba(15, 118, 110, 0.25);
       border-radius: var(--radius-sm);
       padding: var(--space-3) var(--space-4);
-      margin-bottom: var(--space-4);
+      margin-bottom: var(--space-3);
     }
 
     .selected-med-banner-title {
       font-weight: 700;
-      font-size: 15px;
+      font-size: 14.5px;
       color: var(--brand);
       margin-bottom: 2px;
     }
 
     .selected-med-banner-meta {
-      font-size: 13.5px;
+      font-size: 13px;
       color: var(--ink);
       display: flex;
       flex-wrap: wrap;
@@ -360,7 +377,7 @@
     /* Empty States */
     .empty-state {
       text-align: center;
-      padding: var(--space-8) var(--space-4);
+      padding: var(--space-6) var(--space-4);
       background: var(--surface-subtle);
       border: 1px dashed var(--border-strong);
       border-radius: var(--radius-sm);
@@ -370,11 +387,11 @@
     .empty-state strong {
       display: block;
       color: var(--ink);
-      font-size: 15.5px;
-      margin-bottom: 6px;
+      font-size: 14.5px;
+      margin-bottom: 4px;
     }
 
-    /* Recommendation summaries grouped by supplier */
+    /* Recommended Summaries */
     .supplier-summary-card {
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
@@ -384,7 +401,7 @@
     }
 
     .supplier-summary-header {
-      padding: var(--space-3) var(--space-4);
+      padding: var(--space-2) var(--space-3);
       background: var(--brand-soft);
       border-bottom: 1px solid var(--border);
       display: flex;
@@ -396,60 +413,66 @@
 
     .supplier-name {
       font-weight: 700;
-      font-size: 16px;
+      font-size: 15px;
       color: var(--brand);
     }
 
     .supplier-totals {
       font-weight: 700;
-      font-size: 14.5px;
+      font-size: 13.5px;
       color: var(--ink);
       display: flex;
       align-items: center;
       gap: var(--space-3);
     }
 
-    /* Table Toolbar */
+    /* Toolbar Layout */
     .toolbar {
       display: flex;
       flex-wrap: wrap;
       gap: var(--space-3);
       align-items: center;
       justify-content: space-between;
-      margin-bottom: var(--space-4);
+      margin-bottom: var(--space-3);
     }
 
     .toolbar-filters {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--space-3);
+      gap: var(--space-2);
       flex: 1;
       align-items: center;
     }
 
     .search-box {
       flex: 1;
-      min-width: 260px;
-      max-width: 420px;
+      min-width: 240px;
+      max-width: 380px;
     }
 
     .filter-select {
       width: auto;
-      min-width: 220px;
+      min-width: 200px;
     }
 
-    /* Tables styled */
-    .table-wrapper {
-      overflow-x: auto;
+    /* Scrollable Bottom Table Section */
+    .scrollable-table-card {
+      padding: var(--space-4);
+    }
+
+    .scrollable-table-wrapper {
+      max-height: 520px;
+      overflow-y: auto;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       background: var(--surface);
+      position: relative;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 14px;
+      font-size: 13.5px;
     }
 
     th, td {
@@ -465,6 +488,10 @@
       font-weight: 700;
       white-space: nowrap;
       user-select: none;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 1px 0 var(--border);
     }
 
     th.sortable {
@@ -483,6 +510,16 @@
       background: #eef8f6;
     }
 
+    tbody tr.ordered-row {
+      background: #fcfdfd;
+      opacity: 0.6;
+    }
+
+    tbody tr.ordered-row td.med-title-cell strong {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
     .num {
       text-align: right;
       font-variant-numeric: tabular-nums;
@@ -490,17 +527,17 @@
 
     .code-text {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 13px;
+      font-size: 12.5px;
       color: var(--muted);
       white-space: nowrap;
     }
 
     .qty-badge {
       display: inline-block;
-      padding: 3px 10px;
+      padding: 2px 8px;
       border-radius: 999px;
       font-weight: 700;
-      font-size: 13.5px;
+      font-size: 12.5px;
     }
 
     .qty-positive {
@@ -520,8 +557,8 @@
     }
 
     .comparison-item {
-      font-size: 12.5px;
-      padding: 2px 8px;
+      font-size: 12px;
+      padding: 2px 6px;
       border-radius: 4px;
       background: var(--surface-subtle);
       border: 1px solid var(--border);
@@ -541,7 +578,7 @@
     .no-quote-tag {
       color: var(--muted);
       font-style: italic;
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .success-text {
@@ -579,45 +616,6 @@
       text-decoration: underline;
     }
 
-    .tab-btn {
-      border: 1px solid transparent;
-      background: transparent;
-      padding: 8px 16px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .tab-btn.active {
-      border-color: var(--border) var(--border) transparent var(--border) !important;
-      background: var(--surface) !important;
-      color: var(--brand) !important;
-      border-bottom: 2px solid var(--brand) !important;
-    }
-
-    .distributor-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--brand-soft);
-      color: var(--brand);
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 600;
-    }
-    .distributor-badge .remove-btn {
-      cursor: pointer;
-      font-weight: bold;
-      color: var(--muted);
-      transition: color 0.12s;
-    }
-    .distributor-badge .remove-btn:hover {
-      color: var(--danger);
-    }
-
-    /* Datalist helper styling */
     .autocomplete-list {
       max-height: 200px;
       overflow-y: auto;
@@ -634,13 +632,30 @@
     .autocomplete-item {
       padding: 8px 12px;
       cursor: pointer;
-      font-size: 13.5px;
+      font-size: 13px;
       border-bottom: 1px solid #f0f4f2;
     }
 
     .autocomplete-item:hover {
       background: var(--brand-soft);
       color: var(--brand);
+    }
+
+    /* Checkbox Styles */
+    .order-check-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      padding: var(--space-1);
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s;
+    }
+    .order-check-btn:active {
+      transform: scale(0.9);
     }
   </style>
 </head>
@@ -660,9 +675,10 @@
   </header>
 
   <main class="container">
+    
+    <!-- Top Two-Column Setup Area -->
     <div class="top-grid">
-      <!-- Left side: File upload & Supplier Price Input Form -->
-      <div style="display: flex; flex-direction: column; gap: var(--space-6);">
+      <div style="display: flex; flex-direction: column; gap: var(--space-5);">
         
         <!-- 1. System Setup Card (Upload & Distributors) -->
         <section class="card" aria-labelledby="setupHeading">
@@ -672,7 +688,7 @@
           </div>
 
           <!-- Tabs Navigation -->
-          <div style="display: flex; border-bottom: 1px solid var(--border); margin-bottom: var(--space-4); gap: var(--space-1);">
+          <div style="display: flex; border-bottom: 1px solid var(--border); margin-bottom: var(--space-3); gap: var(--space-1);">
             <button type="button" class="tab-btn active" id="tabUploadBtn">
               📥 นำเข้ารายงานสินค้า
             </button>
@@ -698,7 +714,7 @@
                 <input type="text" id="newDistributorInput" placeholder="กรอกชื่อผู้จัดจำหน่ายรายใหม่ (เช่น SP Drug)...">
                 <button type="button" class="btn btn-primary btn-sm" id="addNewDistributorBtn">➕ เพิ่มรายชื่อ</button>
               </div>
-              <div class="field-label" style="margin: 0; font-size: 13.5px;">รายชื่อผู้จัดจำหน่ายมาตรฐานในระบบ (คลิก ✕ เพื่อลบ):</div>
+              <div class="field-label" style="margin: 0; font-size: 13px;">รายชื่อผู้จัดจำหน่ายมาตรฐานในระบบ (คลิก ✕ เพื่อลบ):</div>
               <div id="distributorsBadgeList" style="display: flex; flex-wrap: wrap; gap: var(--space-2); min-height: 80px; max-height: 150px; overflow-y: auto; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-subtle);">
                 <!-- Dynamic distributor badges -->
               </div>
@@ -743,7 +759,7 @@
                 </button>
               </div>
 
-              <div class="btn-row" style="margin-top: var(--space-4);">
+              <div class="btn-row" style="margin-top: var(--space-3);">
                 <button type="button" class="btn btn-primary" id="saveProductQuotesBtn" style="flex: 1;">
                   💾 บันทึกข้อมูลราคาสินค้านี้
                 </button>
@@ -755,41 +771,44 @@
 
             <div id="editorEmptyState" class="empty-state">
               <strong>ยังไม่ได้เลือกรายการสินค้า</strong>
-              พิมพ์เลือกชื่อยาด้านบน หรือคลิกปุ่ม <strong>"กรอก/แก้ไขราคา"</strong> ในตารางสินค้าด้านล่าง เพื่อเปิดใช้งานตัวจัดการราคา
+              พิมพ์เลือกชื่อยาด้านบน หรือคลิกที่ <strong>รหัสสินค้า</strong> หรือ <strong>ชื่อยา</strong> ในตารางด้านล่าง เพื่อเปิดใช้งานตัวจัดการราคาโดยอัตโนมัติ
             </div>
           </div>
         </section>
       </div>
 
-      <!-- Right side: Recommended Ordering Grouped by cheapest supplier -->
-      <section class="card" aria-labelledby="recommendationHeading">
-        <div class="card-header">
-          <h2 class="card-title" id="recommendationHeading">สรุปรายการสั่งซื้อที่ประหยัดต้นทุนสูงสุด (Recommended Orders)</h2>
-          <p class="card-subtitle">ระบบจัดชุดผู้จำหน่ายที่ให้ราคาต่ำที่สุดของแต่ละรายการยาโดยอัตโนมัติ เพื่อประหยัดต้นทุนสูงสุด</p>
-        </div>
+      <div style="display: flex; flex-direction: column; gap: var(--space-5);">
+        
+        <!-- 3. Recommended Purchases grouped by cheapest vendor -->
+        <section class="card" aria-labelledby="recommendationHeading">
+          <div class="card-header">
+            <h2 class="card-title" id="recommendationHeading">สรุปรายการสั่งซื้อที่ประหยัดต้นทุนสูงสุด (Recommended Orders)</h2>
+            <p class="card-subtitle">ระบบจัดชุดผู้จำหน่ายที่ให้ราคาต่ำที่สุดของแต่ละรายการยาโดยอัตโนมัติ เพื่อประหยัดต้นทุนสูงสุด</p>
+          </div>
 
-        <div id="supplierRecommendationsContainer">
-          <!-- Dynamically populated recommended purchases grouped by cheapest vendor -->
-        </div>
-      </section>
+          <div id="supplierRecommendationsContainer">
+            <!-- Dynamically populated recommended purchases grouped by cheapest vendor -->
+          </div>
+        </section>
 
-      <!-- New Card: Tied Prices -->
-      <section class="card" aria-labelledby="tiedHeading">
-        <div class="card-header">
-          <h2 class="card-title" id="tiedHeading">⚖️ รายการสินค้าที่ผู้เสนอราคาต่ำสุดเท่ากัน (รอตัดสินใจเลือก)</h2>
-          <p class="card-subtitle">แสดงสินค้าที่มีบริษัทเสนอราคาถูกที่สุดเท่ากันตั้งแต่ 2 รายขึ้นไป เพื่อให้ท่านเลือกผู้จัดจำหน่ายด้วยตนเองภายหลัง</p>
-        </div>
-        <div id="tiedLowestPricesContainer">
-          <!-- Dynamically populated list of tied items -->
-        </div>
-      </section>
+        <!-- 4. Tied Prices Card -->
+        <section class="card" aria-labelledby="tiedHeading">
+          <div class="card-header">
+            <h2 class="card-title" id="tiedHeading" style="color: var(--warning);">⚖️ รายการสินค้าที่ผู้เสนอราคาต่ำสุดเท่ากัน (รอตัดสินใจเลือก)</h2>
+            <p class="card-subtitle">แสดงสินค้าที่มีบริษัทเสนอราคาถูกที่สุดเท่ากันตั้งแต่ 2 รายขึ้นไป เพื่อให้ท่านเลือกผู้จัดจำหน่ายด้วยตนเองภายหลัง</p>
+          </div>
+          <div id="tiedLowestPricesContainer">
+            <!-- Dynamically populated list of tied items -->
+          </div>
+        </section>
+      </div>
     </div>
 
-    <!-- Main Full-Width Table Section -->
-    <section class="card" aria-labelledby="mainTableHeading">
+    <!-- 5. Scrollable Bottom Table Section (Independent scroll container) -->
+    <section class="card scrollable-table-card" aria-labelledby="mainTableHeading">
       <div class="card-header">
-        <h2 class="card-title" id="mainTableHeading">ตารางรายการคำนวณและเปรียบเทียบต้นทุนสั่งซื้อทั้งหมด</h2>
-        <p class="card-subtitle">แสดงรายการสินค้าทั้งหมดและยอดที่ต้องการสั่งซื้อ (Max Stock - Min Stock) พร้อมรายละเอียดราคาผู้จำหน่ายเปรียบเทียบ</p>
+        <h2 class="card-title" id="mainTableHeading">ตารางรายการสินค้าและข้อมูลราคาเปรียบเทียบทั้งหมด</h2>
+        <p class="card-subtitle">ท่านสามารถกดยกเลิกการแสดงผลสินค้าทีทำรายการจัดสั่งเรียบร้อยแล้วโดยคลิกที่สัญลักษณ์สั่งซื้อ (เช็กบ็อกซ์)</p>
       </div>
 
       <div class="toolbar">
@@ -804,7 +823,8 @@
           </div>
 
           <select id="statusFilter" class="filter-select" aria-label="กรองสถานะ">
-            <option value="need_order">เฉพาะรายการที่ต้องสั่งซื้อ (Max - Min &gt; 0)</option>
+            <option value="need_order">เฉพาะที่ต้องสั่ง (Max-Min &gt; 0) และยังไม่ได้กดสั่ง</option>
+            <option value="ordered">เฉพาะรายการที่กดสั่งซื้อแล้ว (จัดทำรายการเสร็จ)</option>
             <option value="all">แสดงสินค้าทุกรายการในรายงาน</option>
             <option value="has_quotes">เฉพาะรายการที่มีข้อมูลผู้จัดจำหน่ายแล้ว</option>
             <option value="no_quotes">เฉพาะรายการที่ยังไม่มีการระบุราคาผู้จำหน่าย</option>
@@ -825,10 +845,12 @@
         </div>
       </div>
 
-      <div class="table-wrapper">
+      <!-- Independently Scrollable Container -->
+      <div class="scrollable-table-wrapper">
         <table>
           <thead>
             <tr>
+              <th style="width: 50px; text-align: center;">สั่งแล้ว</th>
               <th class="sortable" data-sort="no">ลำดับ <span class="sort-ind" data-col="no"></span></th>
               <th class="sortable" data-sort="code">รหัสสินค้า <span class="sort-ind" data-col="code"></span></th>
               <th class="sortable" data-sort="name">ชื่อสินค้า / เวชภัณฑ์ <span class="sort-ind" data-col="name"></span></th>
@@ -837,21 +859,21 @@
               <th class="sortable num" data-sort="min">Min <span class="sort-ind" data-col="min"></span></th>
               <th class="sortable num" data-sort="orderQty">ต้องสั่ง (Max-Min) <span class="sort-ind" data-col="orderQty">▼</span></th>
               <th>หน่วย</th>
-              <th>เปรียบเทียบราคาผู้จัดจำหน่าย</th>
+              <th style="width: 260px;">เปรียบเทียบราคาผู้จัดจำหน่าย</th>
               <th class="sortable num" data-sort="bestCost">ราคาต่ำสุด <span class="sort-ind" data-col="bestCost"></span></th>
               <th class="sortable num" data-sort="totalCost">รวมต้นทุน <span class="sort-ind" data-col="totalCost"></span></th>
               <th style="text-align: center;">จัดการ</th>
             </tr>
           </thead>
           <tbody id="inventoryTableBody">
-            <!-- Table rows will populate here dynamically -->
+            <!-- Table rows populate dynamically here -->
           </tbody>
         </table>
       </div>
     </section>
   </main>
 
-  <!-- SheetJS CDN (We handle xlsx and csv parsing perfectly in JS client side!) -->
+  <!-- SheetJS CDN (XLSX and CSV parser) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- Raw initial embedded data -->
@@ -873,7 +895,7 @@
       let products = [];
       let activeReportName = "รายงานสินค้าใกล้หมด_2026-11-17.xlsx (149 รายการ)";
 
-      // Try loading from localStorage
+      // Try loading products from localStorage
       let hasStoredProducts = false;
       try {
         const storedProds = localStorage.getItem('pharmacy_active_products_v2');
@@ -913,17 +935,46 @@
         }
       }
 
+      // Distributors state
+      let distributorsList = ['SP Drug', 'DKSH', 'Zuellig Pharma', 'ยี่ปั๊ว A'];
+      try {
+        const savedDists = localStorage.getItem('pharmacy_distributors_v2');
+        if (savedDists) {
+          distributorsList = JSON.parse(savedDists);
+        }
+      } catch (e) {
+        console.warn("Could not read distributors from localStorage", e);
+      }
+
+      function saveDistributorsState() {
+        try {
+          localStorage.setItem('pharmacy_distributors_v2', JSON.stringify(distributorsList));
+        } catch (e) {
+          console.warn("Could not write distributors to localStorage", e);
+        }
+      }
+
+      function getDistributorSelectOptions(selectedCompany = '') {
+        let html = `<option value="">-- เลือกผู้จัดจำหน่าย --</option>`;
+        distributorsList.forEach(d => {
+          const sel = d.toLowerCase().trim() === selectedCompany.toLowerCase().trim() ? 'selected' : '';
+          html += `<option value="${escapeHtml(d)}" ${sel}>${escapeHtml(d)}</option>`;
+        });
+        if (selectedCompany && !distributorsList.some(d => d.toLowerCase().trim() === selectedCompany.toLowerCase().trim())) {
+          html += `<option value="${escapeHtml(selectedCompany)}" selected>${escapeHtml(selectedCompany)} (ไม่อยู่ในรายชื่อมาตรฐาน)</option>`;
+        }
+        return html;
+      }
+
       // Persistent Quote Storage structure: { [productCode]: [ { company: "Company A", price: 10 }, ... ] }
       let supplierQuotesMap = {};
-
-      // Retrieve previous entries from localStorage if available
       try {
         const savedQuotes = localStorage.getItem('pharmacy_supplier_quotes_v2');
         if (savedQuotes) {
           supplierQuotesMap = JSON.parse(savedQuotes);
         }
       } catch (e) {
-        console.warn("localStorage is not available or blocked in sandbox. Using in-memory state.", e);
+        console.warn("Could not load supplier quotes from localStorage.", e);
       }
 
       // Persistent Tied Supplier Selection structure: { [productCode]: "Selected Company Name" }
@@ -945,12 +996,31 @@
         }
       }
 
-      // State variables
+      // Persistent Ordered items codes list
+      let orderedProductCodes = [];
+      try {
+        const savedOrdered = localStorage.getItem('pharmacy_ordered_codes_v2');
+        if (savedOrdered) {
+          orderedProductCodes = JSON.parse(savedOrdered);
+        }
+      } catch (e) {
+        console.warn("Could not read ordered codes from localStorage", e);
+      }
+
+      function saveOrderedCodesState() {
+        try {
+          localStorage.setItem('pharmacy_ordered_codes_v2', JSON.stringify(orderedProductCodes));
+        } catch (e) {
+          console.warn("Could not write ordered codes to localStorage", e);
+        }
+      }
+
+      // UI state variables
       let selectedProductCode = null;
       let sortCol = 'orderQty';
       let sortDir = 'desc';
 
-      // UI Element Bindings
+      // Bind UI elements
       const fileInput = document.getElementById('fileInput');
       const uploadZone = document.getElementById('uploadZone');
       const uploadZoneTitle = document.getElementById('uploadZoneTitle');
@@ -1005,7 +1075,37 @@
           .replace(/'/g, '&#039;');
       }
 
-      // --- 1. Autocomplete Search and Selection ---
+      function debounce(func, delay = 120) {
+        let timer;
+        return function(...args) {
+          clearTimeout(timer);
+          timer = setTimeout(() => func.apply(this, args), delay);
+        };
+      }
+
+      // Match medicine helper
+      function findMatchingItem(inputStr) {
+        const clean = String(inputStr || '').trim();
+        if (!clean) return null;
+
+        const codeMatch = clean.match(/^\[([^\]]+)\]\s*(.*)$/);
+        if (codeMatch) {
+          const code = codeMatch[1].trim().toLowerCase();
+          const byCode = products.find(it => it.code.toLowerCase() === code);
+          if (byCode) return byCode;
+        }
+
+        const lower = clean.toLowerCase();
+        return (
+          products.find(it => it.code.toLowerCase() === lower) ||
+          products.find(it => it.name.toLowerCase() === lower) ||
+          products.find(it => `[${it.code}] ${it.name}`.toLowerCase() === lower) ||
+          products.find(it => it.name.toLowerCase().includes(lower) || it.code.toLowerCase().includes(lower)) ||
+          null
+        );
+      }
+
+      // --- Autocomplete search and selection ---
       searchProductInput.addEventListener('input', function() {
         const query = this.value.trim().toLowerCase();
         if (!query) {
@@ -1031,7 +1131,6 @@
         autocompleteList.style.display = 'block';
       });
 
-      // Handle item click inside autocomplete dropdown
       autocompleteList.addEventListener('click', function(e) {
         const item = e.target.closest('.autocomplete-item');
         if (!item || !item.dataset.code) return;
@@ -1041,14 +1140,13 @@
         searchProductInput.value = '';
       });
 
-      // Close dropdown when clicking outside
       document.addEventListener('click', function(e) {
-        if (!e.target.closest('.product-select-wrapper') && e.target !== searchProductInput) {
+        if (e.target !== searchProductInput) {
           autocompleteList.style.display = 'none';
         }
       });
 
-      // --- 2. Dynamic Distributor Price Editor ---
+      // --- Supplier row generator ---
       function loadProductIntoEditor(code) {
         const prod = products.find(p => p.code === code);
         if (!prod) return;
@@ -1064,7 +1162,6 @@
           </span>
         `;
 
-        // Clear and load existing quotes or start with one empty row
         distributorRowsContainer.innerHTML = '';
         const existingQuotes = supplierQuotesMap[code] || [];
         
@@ -1073,44 +1170,12 @@
             addDistributorRow(q.company, q.price);
           });
         } else {
-          // Add two initial blank rows for convenience of comparison
           addDistributorRow('', '');
           addDistributorRow('', '');
         }
 
         editorEmptyState.style.display = 'none';
         activeEditorSection.style.display = 'block';
-      }
-
-      // Distributors list
-      let distributorsList = ['SP Drug', 'DKSH', 'Zuellig Pharma', 'ยี่ปั๊ว A'];
-      try {
-        const savedDists = localStorage.getItem('pharmacy_distributors_v2');
-        if (savedDists) {
-          distributorsList = JSON.parse(savedDists);
-        }
-      } catch (e) {
-        console.warn("Could not read distributors from localStorage", e);
-      }
-
-      function saveDistributorsState() {
-        try {
-          localStorage.setItem('pharmacy_distributors_v2', JSON.stringify(distributorsList));
-        } catch (e) {
-          console.warn("Could not write distributors to localStorage", e);
-        }
-      }
-
-      function getDistributorSelectOptions(selectedCompany = '') {
-        let html = `<option value="">-- เลือกผู้จัดจำหน่าย --</option>`;
-        distributorsList.forEach(d => {
-          const sel = d.toLowerCase().trim() === selectedCompany.toLowerCase().trim() ? 'selected' : '';
-          html += `<option value="${escapeHtml(d)}" ${sel}>${escapeHtml(d)}</option>`;
-        });
-        if (selectedCompany && !distributorsList.some(d => d.toLowerCase().trim() === selectedCompany.toLowerCase().trim())) {
-          html += `<option value="${escapeHtml(selectedCompany)}" selected>${escapeHtml(selectedCompany)} (ไม่อยู่ในรายชื่อมาตรฐาน)</option>`;
-        }
-        return html;
       }
 
       function addDistributorRow(company = '', price = '') {
@@ -1130,10 +1195,8 @@
           </div>
         `;
 
-        // Handle delete row action
         row.querySelector('.delete-row-btn').addEventListener('click', function() {
           row.remove();
-          // Ensure we have at least one row if empty
           if (distributorRowsContainer.children.length === 0) {
             addDistributorRow('', '');
           }
@@ -1170,45 +1233,42 @@
           }
         });
 
-        // Save into global state (even if empty, which means deleting all suppliers of this product)
         if (newQuotes.length > 0) {
           supplierQuotesMap[selectedProductCode] = newQuotes;
         } else {
           delete supplierQuotesMap[selectedProductCode];
         }
 
-        // Persist quotes in localStorage
         try {
           localStorage.setItem('pharmacy_supplier_quotes_v2', JSON.stringify(supplierQuotesMap));
         } catch (e) {
           console.warn("Could not write to localStorage.", e);
         }
 
-        // Close editor, reset selected code
         activeEditorSection.style.display = 'none';
         editorEmptyState.style.display = 'block';
         selectedProductCode = null;
 
-        // Render recalculated screens
         renderAll();
       });
 
+      function getQuotesForItem(item) {
+        const quotes = supplierQuotesMap[item.code] || [];
+        return [...quotes].sort((a, b) => a.price - b.price);
+      }
 
-      // --- 3. Dynamic Calculation & Aggregations ---
+      // --- Dynamic Calculation & Aggregations ---
       function getCalculations() {
-        // Group the best/lowest supplier recommendations
         const supplierGroups = {};
         const tiedItemsList = [];
 
-        // Process all active items
         const enrichedItems = products.map(item => {
-          const quotes = supplierQuotesMap[item.code] || [];
+          const quotes = getQuotesForItem(item);
           let bestQuote = null;
           let sortedQuotes = [];
 
           if (quotes.length > 0) {
-            // Sort to find the cheapest supplier
-            sortedQuotes = [...quotes].sort((a, b) => a.price - b.price);
+            sortedQuotes = quotes;
           }
 
           const orderQty = item.orderQty;
@@ -1216,27 +1276,28 @@
           let totalCost = null;
           let isTied = false;
           let tiedCompanies = [];
+          
+          const isOrdered = orderedProductCodes.includes(item.code);
 
           if (sortedQuotes.length > 0) {
             const lowestPrice = sortedQuotes[0].price;
             const tiedQuotes = sortedQuotes.filter(q => q.price === lowestPrice);
 
-            if (tiedQuotes.length >= 2 && orderQty > 0) {
+            // Tie-Breaking condition (and only if needs ordering and not marked as ordered yet)
+            if (tiedQuotes.length >= 2 && orderQty > 0 && !isOrdered) {
               isTied = true;
               tiedCompanies = tiedQuotes.map(q => q.company);
 
-              // Check if user has already made a selection for this tied product
               const userSelection = selectedTiedSuppliersMap[item.code];
               if (userSelection && tiedCompanies.includes(userSelection)) {
-                // User has chosen! Use this selection
                 bestQuote = tiedQuotes.find(q => q.company === userSelection);
                 bestCost = bestQuote.price;
                 totalCost = orderQty * bestCost;
               } else {
-                // No selection yet. This is a pending tie!
+                // Pending tie selection
                 bestQuote = null;
-                bestCost = lowestPrice; // show the tied lowest cost in the table
-                totalCost = null;       // total is null because no company is chosen yet
+                bestCost = lowestPrice;
+                totalCost = null; 
               }
 
               tiedItemsList.push({
@@ -1250,22 +1311,22 @@
               });
 
             } else {
-              // Not a tie
+              // No tie
               bestQuote = sortedQuotes[0];
               bestCost = bestQuote ? bestQuote.price : null;
               totalCost = bestCost !== null ? orderQty * bestCost : null;
             }
           }
 
-          // Calculate savings if multiple quotes exist and we have chosen/assigned a winner
+          // Savings calculation
           let savedAmount = 0;
-          if (sortedQuotes.length > 1 && orderQty > 0 && bestQuote) {
+          if (sortedQuotes.length > 1 && orderQty > 0 && bestQuote && !isOrdered) {
             const worstQuote = sortedQuotes[sortedQuotes.length - 1];
             savedAmount = orderQty * Math.max(0, worstQuote.price - bestQuote.price);
           }
 
-          // If the item needs ordering, accumulate into the supplier group recommendation
-          if (bestQuote && orderQty > 0) {
+          // Accumulate orders for the winner (ignore if already ordered)
+          if (bestQuote && orderQty > 0 && !isOrdered) {
             const sName = bestQuote.company;
             if (!supplierGroups[sName]) {
               supplierGroups[sName] = {
@@ -1295,14 +1356,14 @@
             bestCost,
             totalCost,
             isTied,
-            tiedCompanies
+            tiedCompanies,
+            isOrdered
           };
         });
 
         return { enrichedItems, supplierGroups, tiedItemsList };
       }
 
-      // Render the aggregated recommended distributor purchase groups
       function renderSupplierPlans(supplierGroups) {
         const groups = Object.values(supplierGroups).sort((a, b) => b.totalPurchase - a.totalPurchase);
 
@@ -1310,7 +1371,7 @@
           supplierRecommendationsContainer.innerHTML = `
             <div class="empty-state">
               <strong>ยังไม่มีแผนคำแนะนำเปรียบเทียบราคา</strong>
-              เมื่อคุณทำากรเลือกยาแล้วระบุข้อมูลราคาสินค้า ระบบจะนำข้อมูลมาวิเคราะห์จัดกลุ่มและแนะนำบริษัทผู้จำหน่ายที่คุ้มค่าที่สุดที่นี่ให้คุณโดยอัตโนมัติ
+              ระบุคู่ค้าและราคาต้นทุน ระบบจะคำนวณและแนะนำบริษัทจัดซื้อที่คุ้มค่าที่สุดให้คุณที่นี่โดยอัตโนมัติ
             </div>
           `;
           return;
@@ -1320,8 +1381,8 @@
           const itemRows = g.items.map(entry => `
             <tr>
               <td>
-                <div style="font-weight:600; color: var(--ink);">${escapeHtml(entry.productName)}</div>
-                <div class="code-text">${escapeHtml(entry.productCode)}</div>
+                <div class="clickable-cell" data-edit-code="${escapeHtml(entry.productCode)}" style="font-weight:600; color: var(--ink);" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">${escapeHtml(entry.productName)}</div>
+                <div class="code-text clickable-cell" data-edit-code="${escapeHtml(entry.productCode)}" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">${escapeHtml(entry.productCode)}</div>
               </td>
               <td class="num"><strong>${formatNumber(entry.orderQty)}</strong> ${escapeHtml(entry.unit)}</td>
               <td class="num">${formatCurrency(entry.price)}</td>
@@ -1362,14 +1423,13 @@
         }).join('');
       }
 
-      // Render tied lowest price items list
       function renderTiedItems(tiedItems) {
         const container = document.getElementById('tiedLowestPricesContainer');
         if (tiedItems.length === 0) {
           container.innerHTML = `
             <div class="empty-state">
-              <strong>ไม่มีรายการสินค้าที่ราคาเท่ากัน</strong>
-              ทุกรายการที่มีข้อมูลราคา มีบริษัทที่เสนอราคาเสนอต่ำสุดเป็นผู้ชนะเพียงเจ้าเดียวอย่างชัดเจน
+              <strong>ไม่มีรายการสินค้าที่ราคาเสนอเท่ากัน</strong>
+              ทุกรายการที่มีข้อมูลราคา มีบริษัทเสนอราคาต่ำที่สุดเป็นเอกฉันท์ชัดเจน
             </div>
           `;
           return;
@@ -1381,10 +1441,10 @@
           if (entry.selection) {
             compBadges = `
               <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
-                <span style="color: var(--success); font-weight: 700; font-size: 13.5px; display: inline-flex; align-items: center; gap: 4px;">
+                <span style="color: var(--success); font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 4px;">
                   ✓ เลือกสั่งจาก: <strong style="text-decoration: underline;">${escapeHtml(entry.selection)}</strong>
                 </span>
-                <button type="button" class="btn btn-danger btn-sm reset-tied-btn" data-code="${escapeHtml(entry.code)}" style="padding: 2px 8px; font-size: 12px;" title="คลิกเพื่อยกเลิกตัวเลือกและตัดสินใจใหม่">
+                <button type="button" class="btn btn-danger btn-sm reset-tied-btn" data-code="${escapeHtml(entry.code)}" style="padding: 2px 8px; font-size: 11.5px;" title="คลิกเพื่อยกเลิกตัวเลือกและตัดสินใจใหม่">
                   ยกเลิกตัวเลือก
                 </button>
               </div>
@@ -1393,7 +1453,7 @@
             compBadges = `
               <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                 ${entry.companies.map(c => `
-                  <button type="button" class="btn btn-secondary btn-sm select-tied-btn" data-code="${escapeHtml(entry.code)}" data-company="${escapeHtml(c)}" style="border-color: var(--brand); color: var(--brand); padding: 4px 10px; font-size: 13px;" title="คลิกเลือกสั่งซื้อยาตัวนี้จาก ${escapeHtml(c)}">
+                  <button type="button" class="btn btn-secondary btn-sm select-tied-btn" data-code="${escapeHtml(entry.code)}" data-company="${escapeHtml(c)}" style="border-color: var(--brand); color: var(--brand); padding: 3px 8px; font-size: 12.5px;" title="คลิกเลือกสั่งซื้อจาก ${escapeHtml(c)}">
                     🏢 ${escapeHtml(c)}
                   </button>
                 `).join('')}
@@ -1404,11 +1464,11 @@
           return `
             <tr>
               <td>
-                <div style="font-weight:700; color: var(--ink);">${escapeHtml(entry.name)}</div>
-                <div class="code-text">${escapeHtml(entry.code)}</div>
+                <div class="clickable-cell" data-edit-code="${escapeHtml(entry.code)}" style="font-weight:700; color: var(--ink);" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">${escapeHtml(entry.name)}</div>
+                <div class="code-text clickable-cell" data-edit-code="${escapeHtml(entry.code)}" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">${escapeHtml(entry.code)}</div>
               </td>
               <td class="num"><strong>${formatNumber(entry.orderQty)}</strong> ${escapeHtml(entry.unit)}</td>
-              <td class="num" style="color: var(--success); font-weight:700; font-size:14.5px;">${formatCurrency(entry.price)} ฿</td>
+              <td class="num" style="color: var(--success); font-weight:700; font-size:14px;">${formatCurrency(entry.price)} ฿</td>
               <td>
                 ${compBadges}
               </td>
@@ -1423,8 +1483,8 @@
                 <tr>
                   <th>รายการสินค้า</th>
                   <th class="num">ต้องสั่ง</th>
-                  <th class="num">ราคาต่ำสุดต่อหน่วย</th>
-                  <th>บริษัทผู้เสนอราคาต่ำสุดเท่ากัน (คลิกที่ชื่อบริษัทเพื่อเลือกตัดสินใจสั่งซื้อ)</th>
+                  <th class="num">ราคาต่ำสุด</th>
+                  <th>บริษัทผู้เสนอราคาเท่ากัน (คลิกเลือกเพื่อจัดส่งเข้า Recommended Orders)</th>
                 </tr>
               </thead>
               <tbody>
@@ -1434,7 +1494,6 @@
           </div>
         `;
 
-        // Bind selection buttons
         container.querySelectorAll('.select-tied-btn').forEach(btn => {
           btn.addEventListener('click', function() {
             const code = this.getAttribute('data-code');
@@ -1445,7 +1504,6 @@
           });
         });
 
-        // Bind reset buttons
         container.querySelectorAll('.reset-tied-btn').forEach(btn => {
           btn.addEventListener('click', function() {
             const code = this.getAttribute('data-code');
@@ -1456,12 +1514,11 @@
         });
       }
 
-      // Render inventory & calculation main table
       function renderInventoryTable(enrichedItems) {
         const query = tableSearchInput.value.trim().toLowerCase();
         const status = statusFilter.value;
 
-        // Apply dynamic filters
+        // Apply filters
         let filtered = enrichedItems.filter(row => {
           if (query) {
             const matchName = row.name.toLowerCase().includes(query);
@@ -1470,7 +1527,13 @@
             if (!matchName && !matchCode && !matchSupplier) return false;
           }
 
-          if (status === 'need_order' && row.orderQty <= 0) return false;
+          if (status === 'need_order') {
+            // Must need order (Max-Min > 0) AND must not be marked as ordered yet
+            if (row.orderQty <= 0 || row.isOrdered) return false;
+          }
+          if (status === 'ordered') {
+            if (!row.isOrdered) return false;
+          }
           if (status === 'has_quotes' && row.quotes.length === 0) return false;
           if (status === 'no_quotes' && row.quotes.length > 0) return false;
 
@@ -1497,7 +1560,6 @@
           }
         });
 
-        // Set sort header UI indicator
         document.querySelectorAll('.sort-ind').forEach(el => {
           const col = el.getAttribute('data-col');
           if (col === sortCol) {
@@ -1510,10 +1572,10 @@
         if (filtered.length === 0) {
           inventoryTableBody.innerHTML = `
             <tr>
-              <td colspan="12">
+              <td colspan="13">
                 <div class="empty-state" style="border:none;">
                   <strong>ไม่พบรายการสินค้าที่ตรงเงื่อนไข</strong>
-                  ลองใช้คำค้นหาอื่น หรือตรวจสอบตัวกรองสถานะด้านบน
+                  ลองใช้คำค้นหาอื่น หรือปรับตัวกรองสถานะด้านบน
                 </div>
               </td>
             </tr>
@@ -1525,7 +1587,6 @@
           const isNeedOrder = row.orderQty > 0;
           const qtyBadgeClass = isNeedOrder ? 'qty-badge qty-positive' : 'qty-badge qty-zero';
 
-          // Render comparison chips of different distributors
           let supplierComparisonsHtml = `<span class="no-quote-tag">ยังไม่มีการกรอกราคา</span>`;
           if (row.quotes.length > 0) {
             const quotesHtml = row.quotes.map((q, idx) => {
@@ -1539,21 +1600,29 @@
             }).join('');
             
             let statusBanner = '';
-            if (row.isTied) {
+            if (row.isTied && isNeedOrder && !row.isOrdered) {
               if (row.bestQuote) {
-                statusBanner = `<div style="font-size:12.5px; color:var(--success); font-weight:700; margin-bottom: 4px;">✓ เลือกสั่งจาก: ${escapeHtml(row.bestQuote.company)}</div>`;
+                statusBanner = `<div style="font-size:12px; color:var(--success); font-weight:700; margin-bottom: 2px;">✓ เลือกสั่งจาก: ${escapeHtml(row.bestQuote.company)}</div>`;
               } else {
-                statusBanner = `<div style="font-size:12.5px; color:var(--warning); font-weight:700; margin-bottom: 4px;">⚖️ ต่ำสุดเท่ากัน (รอตัดสินใจเลือก)</div>`;
+                statusBanner = `<div style="font-size:12px; color:var(--warning); font-weight:700; margin-bottom: 2px;">⚖️ เสนอเท่ากัน (คลิกเลือกด้านบน)</div>`;
               }
             }
             supplierComparisonsHtml = `${statusBanner}<div class="comparison-container">${quotesHtml}</div>`;
           }
 
+          const checkIcon = row.isOrdered ? '✅' : '⬜';
+          const checkTitle = row.isOrdered ? 'คลิกเพื่อกู้คืนสู่รายการค้างส่ง' : 'คลิกเพื่อระบุว่ากดสั่งซื้อยานี้เรียบร้อยแล้ว (จะตัดออกจากคลังยาค้างสั่ง)';
+
           return `
-            <tr class="${row.bestQuote ? 'highlight-row' : ''}">
+            <tr class="${row.bestQuote ? 'highlight-row' : ''} ${row.isOrdered ? 'ordered-row' : ''}">
+              <td style="text-align: center;">
+                <button type="button" class="order-check-btn" data-toggle-ordered="${escapeHtml(row.code)}" title="${checkTitle}">
+                  ${checkIcon}
+                </button>
+              </td>
               <td class="num">${row.no}</td>
               <td class="code-text clickable-cell" data-edit-code="${escapeHtml(row.code)}" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">${escapeHtml(row.code)}</td>
-              <td class="clickable-cell" data-edit-code="${escapeHtml(row.code)}" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">
+              <td class="clickable-cell med-title-cell" data-edit-code="${escapeHtml(row.code)}" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">
                 <strong style="color: var(--ink);">${escapeHtml(row.name)}</strong>
               </td>
               <td class="num">${formatNumber(row.stock)}</td>
@@ -1578,20 +1647,34 @@
           `;
         }).join('');
 
-        // Wire up individual "กรอก/แก้ไขราคา" buttons
-        inventoryTableBody.querySelectorAll('[data-edit-code]').forEach(btn => {
+        // Wire up check toggle listeners
+        inventoryTableBody.querySelectorAll('[data-toggle-ordered]').forEach(btn => {
           btn.addEventListener('click', function() {
-            const code = this.getAttribute('data-edit-code');
-            loadProductIntoEditor(code);
-            
-            // Scroll to the active editor smoothly
-            document.getElementById('priceEditorHeading').scrollIntoView({
-              behavior: 'smooth',
-              block: 'center'
-            });
+            const code = this.getAttribute('data-toggle-ordered');
+            const idx = orderedProductCodes.indexOf(code);
+            if (idx > -1) {
+              orderedProductCodes.splice(idx, 1);
+            } else {
+              orderedProductCodes.push(code);
+            }
+            saveOrderedCodesState();
+            renderAll();
           });
         });
       }
+
+      // Global delegated listener for clicking on any product code or name across the entire app
+      document.addEventListener('click', function(e) {
+        const target = e.target.closest('[data-edit-code]');
+        if (target) {
+          const code = target.getAttribute('data-edit-code');
+          loadProductIntoEditor(code);
+          document.getElementById('priceEditorHeading').scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+        }
+      });
 
       // Column Sorting listeners
       document.querySelectorAll('th.sortable').forEach(th => {
@@ -1608,17 +1691,17 @@
         });
       });
 
-      tableSearchInput.addEventListener('input', () => {
+      tableSearchInput.addEventListener('input', debounce(() => {
         const { enrichedItems } = getCalculations();
         renderInventoryTable(enrichedItems);
-      });
+      }));
 
       statusFilter.addEventListener('change', () => {
         const { enrichedItems } = getCalculations();
         renderInventoryTable(enrichedItems);
       });
 
-      // Clear all active orders (session only)
+      // Clear all active orders
       clearOrdersBtn.addEventListener('click', () => {
         products.forEach(p => {
           p.orderQty = 0;
@@ -1638,13 +1721,15 @@
         renderAll();
       });
 
-      // Secondary file upload element next to the table
-      tableFileInput.addEventListener('change', e => {
+      // Double file input matching
+      const handleFileEvent = e => {
         const file = e.target.files && e.target.files[0];
         handleFileUpload(file);
-      });
+      };
+      fileInput.addEventListener('change', handleFileEvent);
+      tableFileInput.addEventListener('change', handleFileEvent);
 
-      // Tab switching logic
+      // Tab switching
       tabUploadBtn.addEventListener('click', () => {
         tabUploadBtn.classList.add('active');
         tabDistributorsBtn.classList.remove('active');
@@ -1660,7 +1745,6 @@
         renderDistributorBadges();
       });
 
-      // Render standard distributor list badges
       function renderDistributorBadges() {
         if (distributorsList.length === 0) {
           distributorsBadgeList.innerHTML = `<span style="color:var(--muted); font-size:13px; font-style:italic;">ยังไม่มีรายชื่อผู้จัดจำหน่ายมาตรฐาน</span>`;
@@ -1674,7 +1758,6 @@
           </span>
         `).join('');
 
-        // Wire up remove click listeners
         distributorsBadgeList.querySelectorAll('[data-remove-idx]').forEach(btn => {
           btn.addEventListener('click', function() {
             const idx = parseInt(this.getAttribute('data-remove-idx'), 10);
@@ -1686,12 +1769,10 @@
         });
       }
 
-      // Add new distributor standard name
       addNewDistributorBtn.addEventListener('click', () => {
         const name = newDistributorInput.value.trim();
         if (!name) return;
         
-        // Prevent exact duplicates
         if (!distributorsList.some(d => d.toLowerCase().trim() === name.toLowerCase().trim())) {
           distributorsList.push(name);
           saveDistributorsState();
@@ -1709,7 +1790,6 @@
         }
       });
 
-      // Helper to update dropdowns in the active editor row on the fly
       function refreshActiveEditorSelects() {
         if (selectedProductCode) {
           const selects = distributorRowsContainer.querySelectorAll('.dist-company');
@@ -1720,8 +1800,7 @@
         }
       }
 
-
-      // --- 4. Excel/CSV File Upload and Parsing ---
+      // --- File Upload & Parsing ---
       function handleFileUpload(file) {
         if (!file) return;
 
@@ -1733,17 +1812,13 @@
             const data = evt.target.result;
             const workbook = XLSX.read(data, { type: 'binary' });
             
-            // Try sheet matching
             let sheetName = workbook.SheetNames[0];
-            // If "รายงานสินค้าใกล้หมด" is found, use it
             const matchedName = workbook.SheetNames.find(n => n.includes('รายงานสินค้าใกล้หมด') || n.includes('Sheet1'));
             if (matchedName) sheetName = matchedName;
 
             const sheet = workbook.Sheets[sheetName];
-            // Convert to 2D Array
             const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-            // Find header row containing 'รหัสสินค้า' and 'Stock Max'
             let headerIdx = -1;
             for (let i = 0; i < rows.length; i++) {
               const row = rows[i];
@@ -1757,7 +1832,6 @@
             }
 
             if (headerIdx === -1) {
-              // Try backup lookup with standard headers
               for (let i = 0; i < rows.length; i++) {
                 const rStr = JSON.stringify(rows[i] || []);
                 if (rStr.includes('สินค้า') && (rStr.includes('คงเหลือ') || rStr.includes('Max'))) {
@@ -1774,8 +1848,6 @@
             }
 
             const headerRow = rows[headerIdx];
-            
-            // Map indexes defensively
             const colIndex = {
               no: headerRow.findIndex(h => { const s = String(h || '').toLowerCase(); return s.includes('no') || s.includes('ลำดับ'); }),
               code: headerRow.findIndex(h => { const s = String(h || '').toLowerCase(); return s.includes('รหัสสินค้า') || s === 'รหัส'; }),
@@ -1821,16 +1893,14 @@
               return;
             }
 
-            // Successfully loaded new product list!
             products = parsedProducts;
             activeReportName = `${file.name} (${products.length} รายการ)`;
             activeReportText.textContent = `ไฟล์รายงานปัจจุบัน: ${activeReportName}`;
             uploadZoneTitle.textContent = `✅ อัปโหลดไฟล์เรียบร้อยแล้ว: ${file.name}`;
             saveProductsState();
             
-            // Re-populate and render everything
             populateMedicineDatalist();
-            cancelEditBtn.click(); // Close active editor to prevent mismatch
+            cancelEditBtn.click(); 
             restoreOrdersBtn.style.display = 'none';
             renderAll();
 
@@ -1849,39 +1919,7 @@
         reader.readAsBinaryString(file);
       }
 
-      fileInput.addEventListener('change', function(e) {
-        const file = e.target.files && e.target.files[0];
-        handleFileUpload(file);
-      });
-
-      // Handle Drag & Drop events
-      ['dragenter', 'dragover'].forEach(eventName => {
-        uploadZone.addEventListener(eventName, (e) => {
-          e.preventDefault();
-          uploadZone.style.borderColor = "var(--brand)";
-          uploadZone.style.background = "var(--brand-soft)";
-        }, false);
-      });
-
-      ['dragleave', 'drop'].forEach(eventName => {
-        uploadZone.addEventListener(eventName, (e) => {
-          e.preventDefault();
-          uploadZone.style.borderColor = "var(--border-strong)";
-          uploadZone.style.background = "var(--surface-subtle)";
-        }, false);
-      });
-
-      uploadZone.addEventListener('drop', (e) => {
-        const dt = e.dataTransfer;
-        const file = dt.files && dt.files[0];
-        handleFileUpload(file);
-      });
-
-
-      // --- 5. Initial setup and datalist population ---
-      function populateMedicineDatalist() {
-        // Automatically handled by our beautiful inline autocomplete component now, so datalist is fully managed.
-      }
+      function populateMedicineDatalist() {}
 
       function renderAll() {
         const { enrichedItems, supplierGroups, tiedItemsList } = getCalculations();
@@ -1890,7 +1928,7 @@
         renderInventoryTable(enrichedItems);
       }
 
-      // Perform initial render
+      // Initial render triggers
       activeReportText.textContent = `ไฟล์รายงานปัจจุบัน: ${activeReportName}`;
       renderAll();
     })();
