@@ -569,7 +569,7 @@
     }
 
     .comparison-item.cheapest {
-      background: var(--success-soft);
+      background: var(--surface-subtle);
       border-color: #86efac;
       color: var(--success);
       font-weight: 600;
@@ -835,7 +835,7 @@
           </div>
 
           <select id="statusFilter" class="filter-select" aria-label="กรองสถานะ">
-            <option value="need_order">เฉพาะที่ต้องสั่ง (Max-Min &gt; 0) และยังไม่ได้กดสั่ง</option>
+            <option value="need_order">เฉพาะที่ต้องสั่ง (ยอดสั่งจริง &gt; 0) และยังไม่ได้กดสั่ง</option>
             <option value="ordered">เฉพาะรายการที่กดสั่งซื้อแล้ว (จัดทำรายการเสร็จ)</option>
             <option value="all">แสดงสินค้าทุกรายการในรายงาน</option>
             <option value="has_quotes">เฉพาะรายการที่มีข้อมูลผู้จัดจำหน่ายแล้ว</option>
@@ -869,7 +869,8 @@
               <th class="sortable num" data-sort="stock">คงเหลือ <span class="sort-ind" data-col="stock"></span></th>
               <th class="sortable num" data-sort="max">Max <span class="sort-ind" data-col="max"></span></th>
               <th class="sortable num" data-sort="min">Min <span class="sort-ind" data-col="min"></span></th>
-              <th class="sortable num" data-sort="orderQty">ต้องสั่ง (Max-Min) <span class="sort-ind" data-col="orderQty">▼</span></th>
+              <th class="sortable num" data-sort="orderQty">ต้องสั่ง (Max-Min) <span class="sort-ind" data-col="orderQty"></span></th>
+              <th style="width: 110px;">จำนวนสั่งจริง</th>
               <th>หน่วย</th>
               <th style="width: 260px;">เปรียบเทียบราคาผู้จัดจำหน่าย</th>
               <th class="sortable num" data-sort="bestCost">ราคาต่ำสุด <span class="sort-ind" data-col="bestCost"></span></th>
@@ -889,7 +890,7 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- Raw initial embedded data -->
-  <script id="app-data" type="application/json">[{"no": 1, "code": "PCO00060", "name": "3M NEXCARE FIRST AID TRANSPORE 1\" X 5 YDS", "max": 12, "min": 3, "stock": 0, "lastBuy": 24, "unit": "ม้วน", "orderQty": 9}, {"no": 2, "code": "PCO01288", "name": "DEOLIN 40 MG TABLETS 10'S", "max": 5, "min": 1, "stock": 0, "lastBuy": 10, "unit": "แผง", "orderQty": 4}, {"no": 3, "code": "PCO01310", "name": "DERMOVATE CREAM 15 G", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "หลอด", "orderQty": 1}, {"no": 4, "code": "PCO01311", "name": "DERMOVATE CREAM 5 G", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "หลอด", "orderQty": 1}, {"no": 5, "code": "PCO01885", "name": "FISHERMAN'S FRIEND SUGAR FREE ORIGIN LOZENGES 25 G", "max": 3, "min": 1, "stock": 0, "lastBuy": 4, "unit": "ซอง", "orderQty": 2}, {"no": 6, "code": "PCO02302", "name": "HIDIL 600 MG TABLETS 10'S", "max": 10, "min": 0, "stock": 0, "lastBuy": 10, "unit": "แผง", "orderQty": 10}, {"no": 7, "code": "PCO02897", "name": "MAALOX ALUM MILK ORAL SUSPENSION 240 ML", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 8, "code": "PCO04434", "name": "ORANGE SCOTT'S EMULSION 200 ML", "max": 1, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ขวด", "orderQty": 0}, {"no": 9, "code": "PCO07162", "name": "สำลีม้วน ตรารถพยาบาล 80 ก.", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ห่อ", "orderQty": 1}, {"no": 10, "code": "PCO07824", "name": "ROWATINEX SOFT CAPSULES 10'S", "max": 10, "min": 2, "stock": 0, "lastBuy": 10, "unit": "แผง", "orderQty": 8}, {"no": 11, "code": "PCO08903", "name": "FLAVORIN 100 MG TABLETS 10'S", "max": 13, "min": 3, "stock": 0, "lastBuy": 10, "unit": "แผง", "orderQty": 10}, {"no": 12, "code": "PCO10513", "name": "กำลังช้างสาร ตราสมุนไพรคุณสัมฤทธิ์ ชนิดแคปซูล 60'S", "max": 3, "min": 1, "stock": 0, "lastBuy": 2, "unit": "กระปุก", "orderQty": 2}, {"no": 13, "code": "PCO11764", "name": "ENSURE CHOCOLATE FLAVORED 850 G", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "กระปุก", "orderQty": 1}, {"no": 14, "code": "PCO12070", "name": "PREGABALIN TEVA 75 MG 14'S", "max": 4, "min": 2, "stock": 0, "lastBuy": 4, "unit": "แผง", "orderQty": 2}, {"no": 15, "code": "PCO13345", "name": "GREATER CAL-D 600 MG. 60'S", "max": 3, "min": 1, "stock": 0, "lastBuy": 2, "unit": "กระปุก", "orderQty": 2}, {"no": 16, "code": "PCO13859", "name": "REAL SESAME OIL 500 MG CAPSULES 30'S", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 17, "code": "PCU00120", "name": "GLUCOSA-500 10x10's", "max": 13, "min": 3, "stock": 0, "lastBuy": 10, "unit": "แผง", "orderQty": 10}, {"no": 18, "code": "PCU00194", "name": "SYSTANE ULTRA Fast-Acting 10 ML", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "BT", "orderQty": 1}, {"no": 19, "code": "PCU00198", "name": "HYDROCHLOROTHIAZIDE GPO 50 MG TABLETS 10'S", "max": 3, "min": 1, "stock": 0, "lastBuy": 4, "unit": "แผง", "orderQty": 2}, {"no": 20, "code": "PCU00243", "name": "BUFLEX 600 MG TAB", "max": 500, "min": 100, "stock": 0, "lastBuy": 500, "unit": "TAB", "orderQty": 400}, {"no": 21, "code": "PCO15103", "name": "GAVISCON ADVANCE SUSPENSION 150 ML", "max": 1, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ขวด", "orderQty": 0}, {"no": 22, "code": "PCU00268", "name": "MEDICET 5 MG 10'S", "max": 10, "min": 3, "stock": 0, "lastBuy": 1, "unit": "แผง", "orderQty": 7}, {"no": 23, "code": "PCU00275", "name": "NAPRONAC (Naproxen) 250 MG", "max": 150, "min": 50, "stock": 0, "lastBuy": 150, "unit": "แผง", "orderQty": 100}, {"no": 24, "code": "PCO15349", "name": "BEPANTHEN FIRST AID 3.5 G", "max": 2, "min": 1, "stock": 0, "lastBuy": 2, "unit": "BX", "orderQty": 1}, {"no": 25, "code": "PCU00329", "name": "TUBIGRIP FEEL FREE ANKLE M", "max": 1, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ชิ้น", "orderQty": 0}, {"no": 26, "code": "PCU00403", "name": "FLUTINE TABLETS 10'S", "max": 5, "min": 0, "stock": 0, "lastBuy": 5, "unit": "แผง", "orderQty": 5}, {"no": 27, "code": "PCU00422", "name": "DESLORA 5 MG 10 TABLETS", "max": 2, "min": 1, "stock": 0, "lastBuy": 0, "unit": "กล่อง", "orderQty": 1}, {"no": 28, "code": "PCU00425", "name": "TUBIGRIP FEEL FREE Palm S", "max": 2, "min": 1, "stock": 0, "lastBuy": 2, "unit": "กล่อง", "orderQty": 1}, {"no": 29, "code": "PCO16885", "name": "หน้ากาก KF94 NEXT HEALTH 10'S (สีขาว)", "max": 20, "min": 5, "stock": 0, "lastBuy": 10, "unit": "ซอง", "orderQty": 15}, {"no": 30, "code": "PCO16914", "name": "NEXT HEALTH เครื่องวัดความดัน NH-881 (LARGE CUFF)", "max": 1, "min": 1, "stock": 0, "lastBuy": 1, "unit": "เครื่อง", "orderQty": 0}, {"no": 31, "code": "PCU00483", "name": "เขาค้อ ทะเลภู แฮร์ โทนิค 80 มล.", "max": 3, "min": 1, "stock": 0, "lastBuy": 3, "unit": "ขวด", "orderQty": 2}, {"no": 32, "code": "PCO00730", "name": "Blackmores Naturetime Buffered C 500 MG. 200'S.", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 33, "code": "PCO02058", "name": "GASTRO-BISMOL (SALA) SUSPENSION 240 ML", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 34, "code": "PCO04421", "name": "SCHERIPROCT N SUPPOSITORIES 10'S", "max": 1, "min": 1, "stock": 1, "lastBuy": 2, "unit": "กล่อง", "orderQty": 0}, {"no": 35, "code": "PCO04572", "name": "SMOOTH E CREAM 7 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 36, "code": "PCO04786", "name": "SYRINGE BALL NO.5", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ลูก", "orderQty": 0}, {"no": 37, "code": "PCO05000", "name": "TIGERPLAST HIGH HEEL BUDDY กันรองเท้ากัด 9ชิ้น", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "กล่อง", "orderQty": 0}, {"no": 38, "code": "PCO05497", "name": "MEGA NATURAL VITAMIN E 200 IU CAPSULES 60'S", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 0}, {"no": 39, "code": "PCO06750", "name": "ยาน้ำว่านชักมดลูกจอมใจ 300 ซีซี", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 0}, {"no": 40, "code": "PCO07710", "name": "REPARIL-GEL N 10 G", "max": 2, "min": 1, "stock": 1, "lastBuy": 2, "unit": "หลอด", "orderQty": 1}, {"no": 41, "code": "PCO09893", "name": "NAT-B CAPSULES 100'S", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "กระปุก", "orderQty": 0}, {"no": 42, "code": "PCO13698", "name": "POLIDINE SOLUTION 10% 450 ML", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 43, "code": "PCU00036", "name": "TOTAMOL 120 พารา น้ำ โททามอล 120มก. 60 มล.(สีชมพู TO)", "max": 6, "min": 3, "stock": 1, "lastBuy": 6, "unit": "ขวด", "orderQty": 3}, {"no": 44, "code": "PCU00060", "name": "TIGERPLAST LEOPOVIDINE GEL 20G", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 1}, {"no": 45, "code": "PCU00067", "name": "กระเป๋าน้ำร้อน ใหญ่ อย่างดี", "max": 1, "min": 1, "stock": 1, "lastBuy": 2, "unit": "อัน", "orderQty": 0}, {"no": 46, "code": "PCU00180", "name": "CANESBALANCE VAGINA GEL 7 Tubes", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "กล่อง", "orderQty": 0}, {"no": 47, "code": "PCU00272", "name": "FUTURO ADJUSTABLE WRIST SUPPORT COMPRESSION BASICS ข้อมือ", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ชิ้น", "orderQty": 1}, {"no": 48, "code": "PCU00432", "name": "VISSCO CORE ARM POUCH SLING NO.0805/0820 (M)", "max": 1, "min": 1, "stock": 1, "lastBuy": 2, "unit": "กล่อง", "orderQty": 0}, {"no": 49, "code": "PCU00433", "name": "VISSCO CORE HINGED KNEE CAP O.0706 (M)", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "กล่อง", "orderQty": 0}, {"no": 50, "code": "PCU00461", "name": "REAL ELIXIR 3 LEGEND 4 CAPSULES", "max": 5, "min": 2, "stock": 1, "lastBuy": 4, "unit": "BX", "orderQty": 3}, {"no": 51, "code": "PCU00468", "name": "Dr.Morepen Gluco One Monitoring BG-03", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "BX", "orderQty": 0}, {"no": 52, "code": "PCO00362", "name": "AUREOMYCIN 250 MG CAPSULES 10'S", "max": 4, "min": 2, "stock": 2, "lastBuy": 2, "unit": "แผง", "orderQty": 2}, {"no": 53, "code": "PCO03999", "name": "POLYGOT TABLETS 10'S", "max": 20, "min": 10, "stock": 2, "lastBuy": 10, "unit": "แผง", "orderQty": 10}, {"no": 54, "code": "PCO04308", "name": "ROSIL 1% TOPICAL SOLUTION 10 ML.", "max": 8, "min": 3, "stock": 2, "lastBuy": 8, "unit": "ขวด", "orderQty": 5}, {"no": 55, "code": "PCO06535", "name": "ยากุมารตรากาไก่ 300 ซีซี", "max": 3, "min": 2, "stock": 2, "lastBuy": 2, "unit": "ขวด", "orderQty": 1}, {"no": 56, "code": "PCO14249", "name": "SALONPAS PLASTER กล่อง 10 ชิ้น", "max": 3, "min": 2, "stock": 2, "lastBuy": 5, "unit": "กล่อง", "orderQty": 1}, {"no": 57, "code": "PCO14879", "name": "VELDENT MOUTH SPRAY 18 ML", "max": 4, "min": 2, "stock": 2, "lastBuy": 3, "unit": "ขวด", "orderQty": 2}, {"no": 58, "code": "PCU00373", "name": "ENSURE VANILLA 800 G", "max": 3, "min": 2, "stock": 2, "lastBuy": 3, "unit": "กระป๋อง", "orderQty": 1}, {"no": 59, "code": "PCU00451", "name": "MYOFLEX 10 TABLETS", "max": 30, "min": 10, "stock": 2, "lastBuy": 30, "unit": "แผง", "orderQty": 20}, {"no": 60, "code": "PCU00455", "name": "Covid19 RSV Flu A/B 4in1 ATK", "max": 10, "min": 3, "stock": 2, "lastBuy": 30, "unit": "กล่อง", "orderQty": 7}, {"no": 61, "code": "PCO14455", "name": "VESPERIDONE 10 MG TABLETS 10'S", "max": 75, "min": 25, "stock": 3, "lastBuy": 100, "unit": "แผง", "orderQty": 50}, {"no": 62, "code": "PCU00037", "name": "TOTAMOL 250 พารา น้ำ โททามอล 250มก. 60 มล.", "max": 10, "min": 3, "stock": 3, "lastBuy": 6, "unit": "ขวด", "orderQty": 7}, {"no": 63, "code": "PCU00276", "name": "KRESS-HISTINE 24", "max": 15, "min": 5, "stock": 3, "lastBuy": 50, "unit": "แผง", "orderQty": 10}, {"no": 64, "code": "PCO16423", "name": "MEDIFIX ADHESIVE WOUND DRESSING ROLL 10CMX1M", "max": 8, "min": 4, "stock": 3, "lastBuy": 4, "unit": "กล่อง", "orderQty": 4}, {"no": 65, "code": "PCU00108", "name": "ยาน้ำมันเหลือง สมถวิล", "max": 17, "min": 5, "stock": 4, "lastBuy": 12, "unit": "ขวด", "orderQty": 12}, {"no": 66, "code": "PCU00181", "name": "RHINOTAPP SYRUP ไรโนแท๊ป 60มล.", "max": 18, "min": 6, "stock": 4, "lastBuy": 12, "unit": "กล่อง", "orderQty": 12}, {"no": 67, "code": "PCU00240", "name": "NEXT HEALTH MEDICAL FACE MASK (BLACK)", "max": 6, "min": 4, "stock": 4, "lastBuy": 2, "unit": "กล่อง", "orderQty": 2}, {"no": 68, "code": "PCU00331", "name": "VEREN 50 MG 10'S", "max": 50, "min": 10, "stock": 4, "lastBuy": 50, "unit": "แผง", "orderQty": 40}, {"no": 69, "code": "PCO08786", "name": "CLINOVIR-200 MG TABLETS 5'S", "max": 15, "min": 5, "stock": 5, "lastBuy": 15, "unit": "แผง", "orderQty": 10}, {"no": 70, "code": "PCO15436", "name": "NEUPENTIN 300 MG TABLETS 10’S", "max": 15, "min": 5, "stock": 5, "lastBuy": 10, "unit": "แผง", "orderQty": 10}, {"no": 71, "code": "PCU00317", "name": "BELLA PARA 500 MG 10'S", "max": 50, "min": 10, "stock": 5, "lastBuy": 10, "unit": "แผง", "orderQty": 40}, {"no": 72, "code": "PCU00378", "name": "MEFE 500 10'S", "max": 50, "min": 20, "stock": 6, "lastBuy": 50, "unit": "แผง", "orderQty": 30}, {"no": 73, "code": "PCO02397", "name": "ICOLID 15 MG TABLETS 10'S", "max": 50, "min": 20, "stock": 10, "lastBuy": 50, "unit": "แผง", "orderQty": 30}, {"no": 74, "code": "PCO03220", "name": "MYMOL 500 MG. 10'S", "max": 50, "min": 20, "stock": 11, "lastBuy": 10, "unit": "แผง", "orderQty": 30}, {"no": 75, "code": "PCU00083", "name": "Tigerplast Sheer พลาสติก สีเนื้อ", "max": 100, "min": 100, "stock": 90, "lastBuy": 100, "unit": "ชิ้น", "orderQty": 0}, {"no": 76, "code": "PCO00731", "name": "Blackmores Naturetime Buffered C 500 MG. 31'S.", "max": 2, "min": 1, "stock": 0, "lastBuy": 2, "unit": "ขวด", "orderQty": 1}, {"no": 77, "code": "PCO00915", "name": "CELLUFRESH LUBRICANT EYE DROPS 0.4 ML 30'S", "max": 1, "min": 0, "stock": 0, "lastBuy": 1, "unit": "กล่อง", "orderQty": 1}, {"no": 78, "code": "PCO01817", "name": "EZERRA CREAM 25 G", "max": 1, "min": 1, "stock": 0, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 79, "code": "PCO01855", "name": "FIBRIL 160 MG CAPSULES 10'S", "max": 3, "min": 3, "stock": 0, "lastBuy": 3, "unit": "แผง", "orderQty": 0}, {"no": 80, "code": "PCO01884", "name": "FISHERMAN'S FRIEND ORIGINAL LOZENGES 25 G", "max": 3, "min": 1, "stock": 0, "lastBuy": 6, "unit": "ซอง", "orderQty": 2}, {"no": 81, "code": "PCO02225", "name": "WOODWARD'S GRIPE WATER SYRUP 148 ML", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 82, "code": "PCO02273", "name": "GPO-HCTZ HYDROCHLOROTHIAZIDE 25 MG TABLETS 10'S", "max": 4, "min": 1, "stock": 0, "lastBuy": 1, "unit": "แผง", "orderQty": 3}, {"no": 83, "code": "PCO02338", "name": "HIRUSCAR POST ACNE GEL 5 G", "max": 2, "min": 1, "stock": 0, "lastBuy": 3, "unit": "หลอด", "orderQty": 1}, {"no": 84, "code": "PCO02344", "name": "HISTATAB TABLETS 4 MG TABLETS 100'S", "max": 15, "min": 3, "stock": 0, "lastBuy": 30, "unit": "กระปุก", "orderQty": 12}, {"no": 85, "code": "PCO03161", "name": "MUCOLID SYRUP 60 ML", "max": 3, "min": 1, "stock": 0, "lastBuy": 0, "unit": "ขวด", "orderQty": 2}, {"no": 86, "code": "PCO05356", "name": "VILERM 400 MG TABLETS 5'S", "max": 21, "min": 7, "stock": 0, "lastBuy": 28, "unit": "แผง", "orderQty": 14}, {"no": 87, "code": "PCO05529", "name": "VOLTAREN EMULGEL 50 G", "max": 1, "min": 1, "stock": 0, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 88, "code": "PCO06168", "name": "น้ำมันกวางลุ้ง H.R. 3 CC.", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 89, "code": "PCO06923", "name": "ยาหม่องน้ำเซียงเพียวอิ๊ว-น้ำแดง สูตร1 3 ซีซี", "max": 3, "min": 1, "stock": 0, "lastBuy": 2, "unit": "ขวด", "orderQty": 2}, {"no": 90, "code": "PCO07775", "name": "CLINODERM CREAM 15 G", "max": 6, "min": 3, "stock": 0, "lastBuy": 3, "unit": "กล่อง", "orderQty": 3}, {"no": 91, "code": "PCO07977", "name": "ยาดมผสมสมุนไพร สูตร 2 ตราหงส์ไทย 10 กรัม", "max": 10, "min": 3, "stock": 0, "lastBuy": 12, "unit": "กระปุก", "orderQty": 7}, {"no": 92, "code": "PCO08438", "name": "BONJELA 15G.", "max": 1, "min": 1, "stock": 0, "lastBuy": 2, "unit": "หลอด", "orderQty": 0}, {"no": 93, "code": "PCO09883", "name": "MEGA REGENEZ SOFTGEL CAPSULES 30'S", "max": 3, "min": 1, "stock": 0, "lastBuy": 2, "unit": "BX", "orderQty": 2}, {"no": 94, "code": "PCO10478", "name": "POLAR SPRAY 280 ML", "max": 2, "min": 1, "stock": 0, "lastBuy": 2, "unit": "ขวด", "orderQty": 1}, {"no": 95, "code": "PCO15096", "name": "SMECTA GO SUSPENSION 10 G", "max": 24, "min": 6, "stock": 0, "lastBuy": 72, "unit": "ซอง", "orderQty": 18}, {"no": 96, "code": "PCO00500", "name": "BENZAC AC 2.5 % GEL 60 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 97, "code": "PCO01159", "name": "COUNTERPAIN COOL GEL 60 G", "max": 3, "min": 1, "stock": 1, "lastBuy": 3, "unit": "หลอด", "orderQty": 2}, {"no": 98, "code": "PCO01218", "name": "CYSTALINE 600 MG TABLETS 10'S", "max": 10, "min": 3, "stock": 1, "lastBuy": 6, "unit": "หลอด", "orderQty": 7}, {"no": 99, "code": "PCO01789", "name": "EVRA TRANDERMAL PATCHES 3'S", "max": 1, "min": 1, "stock": 1, "lastBuy": 3, "unit": "BX", "orderQty": 0}, {"no": 100, "code": "PCO02327", "name": "HIRUDOID CREAM 20 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 101, "code": "PCO02328", "name": "HIRUDOID CREAM 40 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 102, "code": "PCO02331", "name": "HIRUDOID FORTE CREAM 20 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 103, "code": "PCO02556", "name": "KAMISTAD GEL N 10 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 104, "code": "PCO03271", "name": "NAPPY HIPPO CREAM  25 G", "max": 3, "min": 1, "stock": 1, "lastBuy": 3, "unit": "หลอด", "orderQty": 2}, {"no": 105, "code": "PCO03953", "name": "PLAIVANA CREAM 35 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 3, "unit": "หลอด", "orderQty": 0}, {"no": 106, "code": "PCO04543", "name": "SKINOREN CREAM 30 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 107, "code": "PCO04784", "name": "SYRINGE BALL NO.3", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ลูก", "orderQty": 0}, {"no": 108, "code": "PCO04814", "name": "SYSTRAL CREAM 25 G", "max": 2, "min": 1, "stock": 1, "lastBuy": 2, "unit": "หลอด", "orderQty": 1}, {"no": 109, "code": "PCO05061", "name": "TONAF 1% CREAM 5 G", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 1}, {"no": 110, "code": "PCO05429", "name": "VISTRA GRAPE SEED 60 MG CAPSULE 30'S", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 0}, {"no": 111, "code": "PCO07381", "name": "BAUSCH+LOMB RENU FRESH MULTI-PURPOSE SOL 355+60 ML", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "กล่อง", "orderQty": 0}, {"no": 112, "code": "PCO08428", "name": "MEGA LECITHIN 1200 MG CAPSULES 100'S", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "กระปุก", "orderQty": 0}, {"no": 113, "code": "PCO08835", "name": "HIRUDOID FORTE CREAM 10 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 114, "code": "PCO09048", "name": "COUNTERPAIN PLUS GEL 25 G", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 1}, {"no": 115, "code": "PCO09888", "name": "NAT D VITAMIN D3 1000 IU 60'S", "max": 1, "min": 1, "stock": 1, "lastBuy": 2, "unit": "กระปุก", "orderQty": 0}, {"no": 116, "code": "PCO12781", "name": "MONTULAIR 10 MG TABLETS 10'S", "max": 10, "min": 3, "stock": 1, "lastBuy": 10, "unit": "แผง", "orderQty": 7}, {"no": 117, "code": "PCO14213", "name": "EUGICA HERBAL MOUTH SPRAY 10 ML", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 118, "code": "PCO14804", "name": "YUWELL เครื่องวัดความดัน YE670A", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "เครื่อง", "orderQty": 0}, {"no": 119, "code": "PCO14871", "name": "SOS PLUS ACNE PATCH แผ่นแปะสิว 12'S", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "กล่อง", "orderQty": 1}, {"no": 120, "code": "PCO01156", "name": "COUNTERPAIN CREAM 60 G", "max": 6, "min": 2, "stock": 2, "lastBuy": 4, "unit": "หลอด", "orderQty": 4}, {"no": 121, "code": "PCO06893", "name": "ยาหม่องเซียงเพียว-ขาว 12G.", "max": 4, "min": 2, "stock": 2, "lastBuy": 2, "unit": "ขวด", "orderQty": 2}, {"no": 122, "code": "PCO06985", "name": "มังกรทอง ยาอมสมุนไพร รสมะนาว", "max": 6, "min": 2, "stock": 2, "lastBuy": 1, "unit": "ขวด", "orderQty": 4}, {"no": 123, "code": "PCO07327", "name": "PUDIN HARA CAPSULES 10'S", "max": 10, "min": 3, "stock": 2, "lastBuy": 10, "unit": "แผง", "orderQty": 7}, {"no": 124, "code": "PCO12909", "name": "Aerotamol 100 mcg 200 metered actuations", "max": 8, "min": 2, "stock": 2, "lastBuy": 2, "unit": "กล่อง", "orderQty": 6}, {"no": 125, "code": "PCO13428", "name": "FISHERMAN’S FRIEND SUGARFREE MIXED BERRIES 25 G", "max": 6, "min": 2, "stock": 2, "lastBuy": 4, "unit": "ซอง", "orderQty": 4}, {"no": 126, "code": "PCO04782", "name": "SYRINGE BALL NO.1", "max": 6, "min": 3, "stock": 3, "lastBuy": 3, "unit": "ลูก", "orderQty": 3}, {"no": 127, "code": "PCO05609", "name": "ZAM-BUK HR OINTMENT 8 G", "max": 6, "min": 3, "stock": 3, "lastBuy": 9, "unit": "ตลับ", "orderQty": 3}, {"no": 128, "code": "PCO08980", "name": "SIXIME 100 MG CAPSULE 10'S", "max": 10, "min": 5, "stock": 4, "lastBuy": 10, "unit": "BX", "orderQty": 5}, {"no": 129, "code": "PCO03974", "name": "SOS PLUS WATERPROOF T3 6x10CM", "max": 15, "min": 5, "stock": 5, "lastBuy": 10, "unit": "กล่อง", "orderQty": 10}, {"no": 130, "code": "PCO14183", "name": "LONGMED NET GAUZE 2\"", "max": 30, "min": 20, "stock": 10, "lastBuy": 10, "unit": "ซอง", "orderQty": 10}, {"no": 131, "code": "PCO00014", "name": "PEPPERMINT FIELD INHALER 2 ML", "max": 6, "min": 2, "stock": 0, "lastBuy": 0, "unit": "หลอด", "orderQty": 4}, {"no": 132, "code": "PCO00232", "name": "AMOKSIKLAV 2X 1000 MG TABLETS 10'S", "max": 6, "min": 2, "stock": 0, "lastBuy": 2, "unit": "กล่อง", "orderQty": 4}, {"no": 133, "code": "PCO07356", "name": "TAMJAI POWDER", "max": 120, "min": 30, "stock": 0, "lastBuy": 300, "unit": "ซอง", "orderQty": 90}, {"no": 134, "code": "PCO09103", "name": "EUROFER-IRON 10 MG/ML SYRUP 60 ML", "max": 1, "min": 1, "stock": 0, "lastBuy": 1, "unit": "กล่อง", "orderQty": 0}, {"no": 135, "code": "PCO00223", "name": "AMMELTZ YOKO YOKO 82 ML", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 0}, {"no": 136, "code": "PCO05600", "name": "XYZAL TABLETS 10'S", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "BX", "orderQty": 1}, {"no": 137, "code": "PCO06926", "name": "ยาหม่องน้ำตราถ้วยทอง 3 ซีซี", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 138, "code": "PCO07709", "name": "REPARIL-GEL N 20 G", "max": 2, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 1}, {"no": 139, "code": "PCO09365", "name": "PURICAS DRAGON'S BLOOD SCAR GEL 8 G", "max": 1, "min": 1, "stock": 1, "lastBuy": 1, "unit": "หลอด", "orderQty": 0}, {"no": 140, "code": "PCO11853", "name": "RETEN FIVE SOLUTION 30 ML", "max": 2, "min": 1, "stock": 1, "lastBuy": 2, "unit": "ขวด", "orderQty": 1}, {"no": 141, "code": "PCO03988", "name": "POLIDENT DENTURE ADHESIVE CREAM (FRESH MINT) 60 G", "max": 3, "min": 2, "stock": 2, "lastBuy": 2, "unit": "หลอด", "orderQty": 1}, {"no": 142, "code": "PCO09078", "name": "RE-B FORTE TABLETS 10'S", "max": 10, "min": 5, "stock": 2, "lastBuy": 10, "unit": "แผง", "orderQty": 5}, {"no": 143, "code": "PCO10667", "name": "POLIDENT DENTURE ADHESIVE CREAM (FRESH MINT) 20 G", "max": 4, "min": 2, "stock": 2, "lastBuy": 3, "unit": "หลอด", "orderQty": 2}, {"no": 144, "code": "PCO00528", "name": "BETADINE SOLUTION 15 ML", "max": 6, "min": 3, "stock": 3, "lastBuy": 4, "unit": "ขวด", "orderQty": 3}, {"no": 145, "code": "PCO04621", "name": "SOBELIN 5 MG CAPSULES 10'S", "max": 60, "min": 10, "stock": 7, "lastBuy": 50, "unit": "แผง", "orderQty": 50}, {"no": 146, "code": "PCO10543", "name": "MAPLE FORTE TABLETS 1'S", "max": 60, "min": 24, "stock": 11, "lastBuy": 24, "unit": "กล่อง", "orderQty": 36}, {"no": 147, "code": "PCO02555", "name": "KAMILLOSAN M SPRAY 15 ML", "max": 24, "min": 12, "stock": 12, "lastBuy": 10, "unit": "ขวด", "orderQty": 12}, {"no": 148, "code": "PCO06902", "name": "ยาหม่องตราถ้วยทอง 12 กรัม", "max": 16, "min": 4, "stock": 4, "lastBuy": 12, "unit": "ขวด", "orderQty": 12}, {"no": 149, "code": "PCO10468", "name": "MOXIPHARM 500 MG CAPSULES 10'S", "max": 200, "min": 100, "stock": 63, "lastBuy": 50, "unit": "แผง", "orderQty": 100}]</script>
+  <script id="app-data" type="application/json">[{"no": 1, "code": "PCU00243", "name": "BUFLEX 600 MG TAB", "max": 500, "min": 100, "stock": 50, "lastBuy": 500, "unit": "TAB", "orderQty": 400}, {"no": 2, "code": "PCU00275", "name": "NAPRONAC (Naproxen) 250 MG", "max": 150, "min": 50, "stock": 10, "lastBuy": 150, "unit": "แผง", "orderQty": 100}, {"no": 3, "code": "PCO14455", "name": "VESPERIDONE 10 MG TABLETS 10'S", "max": 75, "min": 25, "stock": 5, "lastBuy": 100, "unit": "แผง", "orderQty": 50}, {"no": 4, "code": "PCO00060", "name": "3M NEXCARE FIRST AID TRANSPORE 1\" X 5 YDS", "max": 12, "min": 3, "stock": 0, "lastBuy": 24, "unit": "ม้วน", "orderQty": 9}, {"no": 5, "code": "PCO01288", "name": "DEOLIN 40 MG TABLETS 10'S", "max": 5, "min": 1, "stock": 0, "lastBuy": 10, "unit": "แผง", "orderQty": 4}, {"no": 6, "code": "PCO01310", "name": "DERMOVATE CREAM 15 G", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "หลอด", "orderQty": 1}, {"no": 7, "code": "PCO01885", "name": "FISHERMAN'S FRIEND SUGAR FREE ORIGIN LOZENGES 25 G", "max": 3, "min": 1, "stock": 0, "lastBuy": 4, "unit": "ซอง", "orderQty": 2}, {"no": 8, "code": "PCO02302", "name": "HIDIL 600 MG TABLETS 10'S", "max": 10, "min": 0, "stock": 0, "lastBuy": 10, "unit": "แผง", "orderQty": 10}, {"no": 9, "code": "PCO02897", "name": "MAALOX ALUM MILK ORAL SUSPENSION 240 ML", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ขวด", "orderQty": 1}, {"no": 10, "code": "PCO07162", "name": "สำลีม้วน ตรารถพยาบาล 80 ก.", "max": 2, "min": 1, "stock": 0, "lastBuy": 1, "unit": "ห่อ", "orderQty": 1}]</script>
 
   <script>
     (function () {
@@ -925,17 +926,28 @@
 
       // Fallback if no stored products exist
       if (!hasStoredProducts) {
-        products = initialData.map(p => ({
-          no: Number(p.no) || 0,
-          code: String(p.code || '').trim(),
-          name: String(p.name || '').trim(),
-          max: Number(p.max) || 0,
-          min: Number(p.min) || 0,
-          stock: Number(p.stock) || 0,
-          lastBuy: Number(p.lastBuy) || 0,
-          unit: String(p.unit || '').trim(),
-          orderQty: Math.max(0, (Number(p.max) || 0) - (Number(p.min) || 0))
-        }));
+        products = initialData.map(p => {
+          const oQty = Math.max(0, (Number(p.max) || 0) - (Number(p.min) || 0));
+          return {
+            no: Number(p.no) || 0,
+            code: String(p.code || '').trim(),
+            name: String(p.name || '').trim(),
+            max: Number(p.max) || 0,
+            min: Number(p.min) || 0,
+            stock: Number(p.stock) || 0,
+            lastBuy: Number(p.lastBuy) || 0,
+            unit: String(p.unit || '').trim(),
+            orderQty: oQty,
+            actualOrderQty: oQty // Initialize actualOrderQty as default formula-based qty
+          };
+        });
+      } else {
+        // Enforce actualOrderQty is initialized for all loaded products
+        products.forEach(p => {
+          if (p.actualOrderQty === undefined) {
+            p.actualOrderQty = p.orderQty;
+          }
+        });
       }
 
       function saveProductsState() {
@@ -1044,7 +1056,7 @@
 
       // UI state variables
       let selectedProductCode = null;
-      let sortCol = 'orderQty';
+      let sortCol = 'actualOrderQty';
       let sortDir = 'desc';
 
       // Bind UI elements
@@ -1128,7 +1140,7 @@
           products.find(it => it.code.toLowerCase() === lower) ||
           products.find(it => it.name.toLowerCase() === lower) ||
           products.find(it => `[${it.code}] ${it.name}`.toLowerCase() === lower) ||
-          products.find(it => it.name.toLowerCase().includes(lower) || it.code.toLowerCase().includes(lower)) ||
+          products.find(it => item.name.toLowerCase().includes(lower) || item.code.toLowerCase().includes(lower)) ||
           null
         );
       }
@@ -1185,9 +1197,14 @@
           <span>ยอดคงเหลือ: <strong>${formatNumber(prod.stock)}</strong> ${escapeHtml(prod.unit)}</span> | 
           <span>Stock Max: <strong>${formatNumber(prod.max)}</strong></span> | 
           <span>Stock Min: <strong>${formatNumber(prod.min)}</strong></span> | 
-          <span class="pill-badge ${prod.orderQty > 0 ? 'saving-pill' : 'not-order-pill'}">
-            ยอดสั่งซื้อตามสูตร (Max-Min): <strong>${formatNumber(prod.orderQty)} ${escapeHtml(prod.unit)}</strong>
-          </span>
+          <div style="margin-top:8px; display:flex; gap:12px; flex-wrap:wrap;">
+            <span class="pill-badge not-order-pill">
+              ยอดต้องสั่งตามสูตร (Max-Min): <strong>${formatNumber(prod.orderQty)}</strong>
+            </span>
+            <span class="pill-badge saving-pill">
+              จำนวนสั่งจริงปัจจุบัน: <strong>${formatNumber(prod.actualOrderQty)} ${escapeHtml(prod.unit)}</strong>
+            </span>
+          </div>
         `;
 
         distributorRowsContainer.innerHTML = '';
@@ -1299,7 +1316,7 @@
             sortedQuotes = quotes;
           }
 
-          const orderQty = item.orderQty;
+          const orderQty = item.actualOrderQty; // Use actualOrderQty for calculations!
           let bestCost = null;
           let totalCost = null;
           let isTied = false;
@@ -1412,7 +1429,17 @@
                 <div class="clickable-cell" data-edit-code="${escapeHtml(entry.productCode)}" style="font-weight:600; color: var(--ink);" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">${escapeHtml(entry.productName)}</div>
                 <div class="code-text clickable-cell" data-edit-code="${escapeHtml(entry.productCode)}" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">${escapeHtml(entry.productCode)}</div>
               </td>
-              <td class="num"><strong>${formatNumber(entry.orderQty)}</strong> ${escapeHtml(entry.unit)}</td>
+              <td class="num" style="white-space: nowrap;">
+                <input
+                  type="number"
+                  class="rec-actual-qty"
+                  data-code="${escapeHtml(entry.productCode)}"
+                  min="0"
+                  style="width: 75px; text-align: right; padding: 4px; border: 1px solid var(--border-strong); border-radius: 4px;"
+                  value="${entry.orderQty}"
+                >
+                ${escapeHtml(entry.unit)}
+              </td>
               <td class="num">${formatCurrency(entry.price)}</td>
               <td class="num"><strong>${formatCurrency(entry.total)}</strong></td>
               <td>
@@ -1470,7 +1497,7 @@
                   <thead>
                     <tr>
                       <th>รายการเวชภัณฑ์</th>
-                      <th class="num">จำนวนสั่งซื้อ</th>
+                      <th class="num" style="width: 140px;">จำนวนสั่งจริง</th>
                       <th class="num">ราคาต่ำสุด/หน่วย</th>
                       <th class="num">รวม (บาท)</th>
                       <th>การประหยัดต้นทุน</th>
@@ -1591,8 +1618,8 @@
           }
 
           if (status === 'need_order') {
-            // Must need order (Max-Min > 0) AND must not be marked as ordered yet
-            if (row.orderQty <= 0 || row.isOrdered) return false;
+            // Must need order (actualOrderQty > 0) AND must not be marked as ordered yet
+            if (row.actualOrderQty <= 0 || row.isOrdered) return false;
           }
           if (status === 'ordered') {
             if (!row.isOrdered) return false;
@@ -1635,7 +1662,7 @@
         if (filtered.length === 0) {
           inventoryTableBody.innerHTML = `
             <tr>
-              <td colspan="13">
+              <td colspan="14">
                 <div class="empty-state" style="border:none;">
                   <strong>ไม่พบรายการสินค้าที่ตรงเงื่อนไข</strong>
                   ลองใช้คำค้นหาอื่น หรือปรับตัวกรองสถานะด้านบน
@@ -1647,7 +1674,7 @@
         }
 
         inventoryTableBody.innerHTML = filtered.map(row => {
-          const isNeedOrder = row.orderQty > 0;
+          const isNeedOrder = row.actualOrderQty > 0;
           const qtyBadgeClass = isNeedOrder ? 'qty-badge qty-positive' : 'qty-badge qty-zero';
 
           let supplierComparisonsHtml = `<span class="no-quote-tag">ยังไม่มีการกรอกราคา</span>`;
@@ -1691,7 +1718,17 @@
               <td class="num">${formatNumber(row.stock)}</td>
               <td class="num">${formatNumber(row.max)}</td>
               <td class="num">${formatNumber(row.min)}</td>
-              <td class="num"><span class="${qtyBadgeClass}">${formatNumber(row.orderQty)}</span></td>
+              <td class="num">${formatNumber(row.orderQty)}</td>
+              <td class="num">
+                <input
+                  type="number"
+                  class="table-actual-qty"
+                  data-code="${escapeHtml(row.code)}"
+                  min="0"
+                  style="width: 75px; text-align: right; padding: 4px 6px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm);"
+                  value="${row.actualOrderQty}"
+                >
+              </td>
               <td>${escapeHtml(row.unit)}</td>
               <td>${supplierComparisonsHtml}</td>
               <td class="num success-text">${row.bestCost !== null ? formatCurrency(row.bestCost) + ' ฿' : '—'}</td>
@@ -1725,6 +1762,33 @@
           });
         });
       }
+
+      // Wire up quantity synchronization change listeners
+      inventoryTableBody.addEventListener('change', function(e) {
+        if (e.target.classList.contains('table-actual-qty')) {
+          const code = e.target.getAttribute('data-code');
+          const val = parseInt(e.target.value, 10);
+          const prod = products.find(p => p.code === code);
+          if (prod && !isNaN(val) && val >= 0) {
+            prod.actualOrderQty = val;
+            saveProductsState();
+            renderAll();
+          }
+        }
+      });
+
+      supplierRecommendationsContainer.addEventListener('change', function(e) {
+        if (e.target.classList.contains('rec-actual-qty')) {
+          const code = e.target.getAttribute('data-code');
+          const val = parseInt(e.target.value, 10);
+          const prod = products.find(p => p.code === code);
+          if (prod && !isNaN(val) && val >= 0) {
+            prod.actualOrderQty = val;
+            saveProductsState();
+            renderAll();
+          }
+        }
+      });
 
       // Global delegated listener for clicking on any product code or name across the entire app
       document.addEventListener('click', function(e) {
@@ -1767,7 +1831,7 @@
       // Clear all active orders
       clearOrdersBtn.addEventListener('click', () => {
         products.forEach(p => {
-          p.orderQty = 0;
+          p.actualOrderQty = 0;
         });
         restoreOrdersBtn.style.display = 'inline-flex';
         saveProductsState();
@@ -1777,7 +1841,7 @@
       // Restore order quantities based on Formula (Max - Min)
       restoreOrdersBtn.addEventListener('click', () => {
         products.forEach(p => {
-          p.orderQty = Math.max(0, p.max - p.min);
+          p.actualOrderQty = Math.max(0, p.max - p.min);
         });
         restoreOrdersBtn.style.display = 'none';
         saveProductsState();
@@ -2039,6 +2103,7 @@
               const stock = Number(row[colIndex.stock]) || 0;
               const lastBuy = Number(row[colIndex.lastBuy]) || 0;
               const unit = String(row[colIndex.unit] || 'หน่วย').trim();
+              const oQty = Math.max(0, max - min);
 
               parsedProducts.push({
                 no: Number(row[colIndex.no]) || (parsedProducts.length + 1),
@@ -2049,7 +2114,8 @@
                 stock: stock,
                 lastBuy: lastBuy,
                 unit: unit,
-                orderQty: Math.max(0, max - min)
+                orderQty: oQty,
+                actualOrderQty: oQty // Default actualOrderQty on load too
               });
             }
 
