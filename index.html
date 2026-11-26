@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ระบบคำนวณยอดสั่งซื้อยาและเปรียบเทียบต้นทุน</title>
+  <title>ระบบคำนวณยอดสั่งซื้อยาและเปรียบเทียบต้นทุน — สบายดีฟาร์มาซี</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -710,12 +710,24 @@
           <!-- Tab Content 2: Distributors -->
           <div id="tabContentDistributors" style="display: none;">
             <div style="display: flex; flex-direction: column; gap: var(--space-3);">
-              <div style="display: flex; gap: var(--space-2);">
-                <input type="text" id="newDistributorInput" placeholder="กรอกชื่อผู้จัดจำหน่ายรายใหม่ (เช่น SP Drug)...">
-                <button type="button" class="btn btn-primary btn-sm" id="addNewDistributorBtn">➕ เพิ่มรายชื่อ</button>
+              <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto auto; gap: var(--space-2); align-items: end;">
+                <div class="field" style="margin:0;">
+                  <label class="field-label" style="font-size:12px; margin-bottom:2px;" for="newDistributorInput">ชื่อผู้จัดจำหน่าย</label>
+                  <input type="text" id="newDistributorInput" placeholder="เช่น SP Drug, DKSH...">
+                </div>
+                <div class="field" style="margin:0;">
+                  <label class="field-label" style="font-size:12px; margin-bottom:2px;" for="distMinPurchaseInput">ซื้อขั้นต่ำ (฿)</label>
+                  <input type="number" id="distMinPurchaseInput" placeholder="ไม่มีขั้นต่ำ" min="0" step="100">
+                </div>
+                <div class="field" style="margin:0;">
+                  <label class="field-label" style="font-size:12px; margin-bottom:2px;" for="distDiscountPercentInput">ส่วนลด (%)</label>
+                  <input type="number" id="distDiscountPercentInput" placeholder="ไม่มีส่วนลด" min="0" max="100" step="0.5">
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" id="addNewDistributorBtn" style="height:38px;">➕ เพิ่ม</button>
+                <button type="button" class="btn btn-secondary btn-sm" id="cancelDistEditBtn" style="height:38px; display: none;">ยกเลิก</button>
               </div>
-              <div class="field-label" style="margin: 0; font-size: 13px;">รายชื่อผู้จัดจำหน่ายมาตรฐานในระบบ (คลิก ✕ เพื่อลบ):</div>
-              <div id="distributorsBadgeList" style="display: flex; flex-wrap: wrap; gap: var(--space-2); min-height: 80px; max-height: 150px; overflow-y: auto; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-subtle);">
+              <div class="field-label" style="margin: 0; font-size: 13px;">รายชื่อผู้จัดจำหน่ายและเงื่อนไขส่วนลด (คลิกที่ป้ายชื่อเพื่อแก้ไข หรือคลิก ✕ เพื่อลบ):</div>
+              <div id="distributorsBadgeList" style="display: flex; flex-direction: column; gap: var(--space-2); min-height: 100px; max-height: 180px; overflow-y: auto; padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-subtle);">
                 <!-- Dynamic distributor badges -->
               </div>
             </div>
@@ -936,11 +948,26 @@
       }
 
       // Distributors state
-      let distributorsList = ['SP Drug', 'DKSH', 'Zuellig Pharma', 'ยี่ปั๊ว A'];
+      let distributorsList = [
+        { name: 'SP Drug', minPurchase: 5000, discountPercent: 3 },
+        { name: 'DKSH', minPurchase: 0, discountPercent: 0 },
+        { name: 'Zuellig Pharma', minPurchase: 0, discountPercent: 0 },
+        { name: 'ยี่ปั๊ว A', minPurchase: 0, discountPercent: 0 }
+      ];
       try {
         const savedDists = localStorage.getItem('pharmacy_distributors_v2');
         if (savedDists) {
-          distributorsList = JSON.parse(savedDists);
+          const parsed = JSON.parse(savedDists);
+          distributorsList = parsed.map(d => {
+            if (typeof d === 'string') {
+              return { name: d, minPurchase: 0, discountPercent: 0 };
+            }
+            return {
+              name: String(d.name || '').trim(),
+              minPurchase: Number(d.minPurchase) || 0,
+              discountPercent: Number(d.discountPercent) || 0
+            };
+          });
         }
       } catch (e) {
         console.warn("Could not read distributors from localStorage", e);
@@ -957,10 +984,10 @@
       function getDistributorSelectOptions(selectedCompany = '') {
         let html = `<option value="">-- เลือกผู้จัดจำหน่าย --</option>`;
         distributorsList.forEach(d => {
-          const sel = d.toLowerCase().trim() === selectedCompany.toLowerCase().trim() ? 'selected' : '';
-          html += `<option value="${escapeHtml(d)}" ${sel}>${escapeHtml(d)}</option>`;
+          const sel = d.name.toLowerCase().trim() === selectedCompany.toLowerCase().trim() ? 'selected' : '';
+          html += `<option value="${escapeHtml(d.name)}" ${sel}>${escapeHtml(d.name)}</option>`;
         });
-        if (selectedCompany && !distributorsList.some(d => d.toLowerCase().trim() === selectedCompany.toLowerCase().trim())) {
+        if (selectedCompany && !distributorsList.some(d => d.name.toLowerCase().trim() === selectedCompany.toLowerCase().trim())) {
           html += `<option value="${escapeHtml(selectedCompany)}" selected>${escapeHtml(selectedCompany)} (ไม่อยู่ในรายชื่อมาตรฐาน)</option>`;
         }
         return html;
@@ -1052,6 +1079,7 @@
       const tabContentDistributors = document.getElementById('tabContentDistributors');
       const newDistributorInput = document.getElementById('newDistributorInput');
       const addNewDistributorBtn = document.getElementById('addNewDistributorBtn');
+      const cancelDistEditBtn = document.getElementById('cancelDistEditBtn');
       const distributorsBadgeList = document.getElementById('distributorsBadgeList');
 
       // Helper Formats
@@ -1393,13 +1421,48 @@
             </tr>
           `).join('');
 
+          // Calculate distributor discount rules dynamically
+          const distDef = distributorsList.find(d => d.name.toLowerCase().trim() === g.company.toLowerCase().trim());
+          const minPurchase = distDef ? distDef.minPurchase : 0;
+          const discountPercent = distDef ? distDef.discountPercent : 0;
+          
+          let discountAmount = 0;
+          let netTotal = g.totalPurchase;
+          let isDiscountApplied = false;
+          let discountPromoHtml = '';
+
+          if (minPurchase > 0 && discountPercent > 0) {
+            if (g.totalPurchase >= minPurchase) {
+              isDiscountApplied = true;
+              discountAmount = g.totalPurchase * (discountPercent / 100);
+              netTotal = g.totalPurchase - discountAmount;
+              discountPromoHtml = `
+                <div style="text-align: right; line-height: 1.3;">
+                  <div style="font-size:12px; text-decoration:line-through; color:var(--muted);">ยอดก่อนหักส่วนลด: ${formatCurrency(g.totalPurchase)} ฿</div>
+                  <div style="font-size:12px; color:var(--success); font-weight:700;">🎉 ลดเพิ่มพิเศษ ${discountPercent}% (ซื้อครบ ${formatNumber(minPurchase)} ฿) -${formatCurrency(discountAmount)} ฿</div>
+                  <span style="font-size: 13.5px; font-weight:700;">ยอดสั่งซื้อสุทธิ: <strong style="color:var(--brand); font-size:15px;">${formatCurrency(netTotal)} บาท</strong></span>
+                </div>
+              `;
+            } else {
+              discountPromoHtml = `
+                <div style="text-align: right; line-height: 1.3;">
+                  <div style="font-size:11.5px; color:var(--muted); font-weight:500;">ซื้อเพิ่มอีก <strong style="color:var(--brand);">${formatCurrency(minPurchase - g.totalPurchase)} ฿</strong> เพื่อได้ลดเพิ่ม ${discountPercent}%</div>
+                  <span style="font-size: 13.5px; font-weight:700;">ยอดสั่งซื้อรวม: <strong style="color:var(--brand);">${formatCurrency(g.totalPurchase)} บาท</strong></span>
+                </div>
+              `;
+            }
+          } else {
+            discountPromoHtml = `
+              <span>ยอดสั่งซื้อรวม: <strong style="color:var(--brand);">${formatCurrency(g.totalPurchase)} บาท</strong></span>
+            `;
+          }
+
           return `
             <div class="supplier-summary-card">
               <div class="supplier-summary-header">
                 <span class="supplier-name">สั่งซื้อกับ: ${escapeHtml(g.company)}</span>
                 <div class="supplier-totals">
-                  <span>ยอดสั่งซื้อรวม: <strong style="color:var(--brand);">${formatCurrency(g.totalPurchase)} บาท</strong></span>
-                  ${g.totalSaved > 0 ? `<span class="pill-badge saving-pill">เซฟค่าใช้จ่ายได้ ${formatCurrency(g.totalSaved)} บาท</span>` : ''}
+                  ${discountPromoHtml}
                 </div>
               </div>
               <div class="table-wrapper" style="border:none; border-radius:0;">
@@ -1745,23 +1808,56 @@
         renderDistributorBadges();
       });
 
+      let editingDistributorName = null;
+
       function renderDistributorBadges() {
         if (distributorsList.length === 0) {
           distributorsBadgeList.innerHTML = `<span style="color:var(--muted); font-size:13px; font-style:italic;">ยังไม่มีรายชื่อผู้จัดจำหน่ายมาตรฐาน</span>`;
           return;
         }
 
-        distributorsBadgeList.innerHTML = distributorsList.map((d, idx) => `
-          <span class="distributor-badge">
-            🏢 ${escapeHtml(d)}
-            <span class="remove-btn" data-remove-idx="${idx}" title="ลบรายชื่อนี้">✕</span>
-          </span>
-        `).join('');
+        distributorsBadgeList.innerHTML = distributorsList.map((d, idx) => {
+          const ruleText = d.minPurchase > 0 && d.discountPercent > 0 
+            ? `<span style="font-size:11px; font-weight:normal; opacity:0.85;">(ขั้นต่ำ ${formatNumber(d.minPurchase)} ฿ ลด ${d.discountPercent}%)</span>`
+            : '';
+          return `
+            <span class="distributor-badge" style="margin-bottom: 4px; cursor: pointer;" title="คลิกเพื่อแก้ไขเงื่อนไขผู้จัดจำหน่ายรายนี้" data-edit-dist-idx="${idx}">
+              <span class="dist-badge-click-target">🏢 ${escapeHtml(d.name)} ${ruleText}</span>
+              <span class="remove-btn" data-remove-idx="${idx}" title="ลบรายชื่อนี้">✕</span>
+            </span>
+          `;
+        }).join('');
+
+        // Click to Edit handler
+        distributorsBadgeList.querySelectorAll('[data-edit-dist-idx]').forEach(badge => {
+          badge.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-btn')) return; // ignore delete click
+            const idx = parseInt(this.getAttribute('data-edit-dist-idx'), 10);
+            const dist = distributorsList[idx];
+            if (!dist) return;
+
+            editingDistributorName = dist.name;
+            newDistributorInput.value = dist.name;
+            document.getElementById('distMinPurchaseInput').value = dist.minPurchase || '';
+            document.getElementById('distDiscountPercentInput').value = dist.discountPercent || '';
+            addNewDistributorBtn.textContent = '💾 บันทึก';
+            cancelDistEditBtn.style.display = 'inline-flex';
+            newDistributorInput.focus();
+          });
+        });
 
         distributorsBadgeList.querySelectorAll('[data-remove-idx]').forEach(btn => {
-          btn.addEventListener('click', function() {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
             const idx = parseInt(this.getAttribute('data-remove-idx'), 10);
+            const removedName = distributorsList[idx]?.name;
             distributorsList.splice(idx, 1);
+            
+            // If they were editing this one, cancel edit
+            if (editingDistributorName && editingDistributorName === removedName) {
+              cancelDistributorEdit();
+            }
+
             saveDistributorsState();
             renderDistributorBadges();
             refreshActiveEditorSelects();
@@ -1769,18 +1865,88 @@
         });
       }
 
+      function cancelDistributorEdit() {
+        editingDistributorName = null;
+        newDistributorInput.value = '';
+        document.getElementById('distMinPurchaseInput').value = '';
+        document.getElementById('distDiscountPercentInput').value = '';
+        addNewDistributorBtn.textContent = '➕ เพิ่ม';
+        cancelDistEditBtn.style.display = 'none';
+      }
+
+      cancelDistEditBtn.addEventListener('click', cancelDistributorEdit);
+
       addNewDistributorBtn.addEventListener('click', () => {
         const name = newDistributorInput.value.trim();
         if (!name) return;
         
-        if (!distributorsList.some(d => d.toLowerCase().trim() === name.toLowerCase().trim())) {
-          distributorsList.push(name);
+        const minVal = parseFloat(document.getElementById('distMinPurchaseInput').value) || 0;
+        const discountVal = parseFloat(document.getElementById('distDiscountPercentInput').value) || 0;
+
+        if (editingDistributorName) {
+          // Edit Mode
+          const idx = distributorsList.findIndex(d => d.name.toLowerCase() === editingDistributorName.toLowerCase());
+          if (idx === -1) return;
+
+          // Prevent exact name duplicates of other companies
+          const isTaken = distributorsList.some((d, i) => i !== idx && d.name.toLowerCase() === name.toLowerCase());
+          if (isTaken) {
+            alert("มีผู้จัดจำหน่ายชื่อนี้ในระบบแล้ว");
+            return;
+          }
+
+          const oldName = editingDistributorName;
+          distributorsList[idx] = {
+            name: name,
+            minPurchase: minVal,
+            discountPercent: discountVal
+          };
+
+          // If the name was modified, migrate quotes & selections smoothly!
+          if (oldName.toLowerCase() !== name.toLowerCase()) {
+            for (const prodCode in supplierQuotesMap) {
+              supplierQuotesMap[prodCode].forEach(q => {
+                if (q.company.toLowerCase().trim() === oldName.toLowerCase().trim()) {
+                  q.company = name;
+                }
+              });
+            }
+            try {
+              localStorage.setItem('pharmacy_supplier_quotes_v2', JSON.stringify(supplierQuotesMap));
+            } catch (e) {}
+
+            for (const prodCode in selectedTiedSuppliersMap) {
+              if (selectedTiedSuppliersMap[prodCode].toLowerCase().trim() === oldName.toLowerCase().trim()) {
+                selectedTiedSuppliersMap[prodCode] = name;
+              }
+            }
+            saveTiedSelectionsState();
+          }
+
+          cancelDistributorEdit();
           saveDistributorsState();
-          newDistributorInput.value = '';
           renderDistributorBadges();
           refreshActiveEditorSelects();
+          renderAll();
+
         } else {
-          alert("มีชื่อผู้จัดจำหน่ายนี้ในระบบอยู่แล้ว");
+          // Add Mode
+          if (!distributorsList.some(d => d.name.toLowerCase().trim() === name.toLowerCase().trim())) {
+            distributorsList.push({
+              name: name,
+              minPurchase: minVal,
+              discountPercent: discountVal
+            });
+            saveDistributorsState();
+            newDistributorInput.value = '';
+            document.getElementById('distMinPurchaseInput').value = '';
+            document.getElementById('distDiscountPercentInput').value = '';
+            renderDistributorBadges();
+            refreshActiveEditorSelects();
+            renderAll();
+          } else {
+            alert("มีชื่อผู้จัดจำหน่ายนี้ในระบบอยู่แล้ว");
+          }
         }
       });
 
