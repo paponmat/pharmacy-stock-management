@@ -564,8 +564,21 @@
       border: 1px solid var(--border);
       color: var(--muted);
       display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .comparison-item .comp-names-row {
+      display: flex;
       justify-content: space-between;
       gap: var(--space-2);
+    }
+
+    .comparison-item .comp-discount-info {
+      font-size: 10.5px;
+      color: var(--brand);
+      text-align: right;
+      font-style: italic;
     }
 
     .comparison-item.cheapest {
@@ -573,6 +586,10 @@
       border-color: #86efac;
       color: var(--success);
       font-weight: 600;
+    }
+
+    .comparison-item.cheapest .comp-discount-info {
+      color: var(--success);
     }
 
     .no-quote-tag {
@@ -805,12 +822,10 @@
 
         <!-- 4. Tied Prices Card -->
         <section class="card" aria-labelledby="tiedHeading">
-          <div class="card-header">
-            <h2 class="card-title" id="tiedHeading" style="color: var(--warning);">⚖️ รายการสินค้าที่ผู้เสนอราคาต่ำสุดเท่ากัน (รอตัดสินใจเลือก)</h2>
-            <p class="card-subtitle">แสดงสินค้าที่มีบริษัทเสนอราคาถูกที่สุดเท่ากันตั้งแต่ 2 รายขึ้นไป เพื่อให้ท่านเลือกผู้จัดจำหน่ายด้วยตนเองภายหลัง</p>
-          </div>
-          <div id="tiedLowestPricesContainer">
-            <!-- Dynamically populated list of tied items -->
+          <div class="card-title" id="tiedHeading" style="color: var(--warning); padding-bottom: var(--space-2); border-bottom: 1px solid var(--border);">⚖️ รายการสินค้าที่รอตัดสินใจเลือกผู้จัดจำหน่าย</div>
+          <p class="card-subtitle" style="margin-top: 6px;">แสดงสินค้าที่มีเงื่อนไขอย่างใดอย่างหนึ่งดังนี้: (1) มีผู้จำหน่ายเสนอราคาถูกที่สุดเท่ากันตั้งแต่ 2 รายขึ้นไป หรือ (2) ราคาหลังรวมส่วนลดต่ำกว่าราคาดั้งเดิม (Base Price) เพื่อให้ท่านพิจารณาตัดสินใจเป็นพิเศษ</p>
+          <div id="tiedLowestPricesContainer" style="margin-top: var(--space-3);">
+            <!-- Dynamically populated list of tied or discount-applicable items -->
           </div>
         </section>
       </div>
@@ -869,10 +884,10 @@
               <th class="sortable num" data-sort="stock">คงเหลือ <span class="sort-ind" data-col="stock"></span></th>
               <th class="sortable num" data-sort="max">Max <span class="sort-ind" data-col="max"></span></th>
               <th class="sortable num" data-sort="min">Min <span class="sort-ind" data-col="min"></span></th>
-              <th class="sortable num" data-sort="orderQty">ต้องสั่ง (Max-Min) <span class="sort-ind" data-col="orderQty"></span></th>
+              <th class="sortable num" data-sort="orderQty">ต้องสั่ง <span class="sort-ind" data-col="orderQty"></span></th>
               <th style="width: 110px;">จำนวนสั่งจริง</th>
               <th>หน่วย</th>
-              <th style="width: 260px;">เปรียบเทียบราคาผู้จัดจำหน่าย</th>
+              <th style="width: 320px;">เปรียบเทียบราคา</th>
               <th class="sortable num" data-sort="bestCost">ราคาต่ำสุด <span class="sort-ind" data-col="bestCost"></span></th>
               <th class="sortable num" data-sort="totalCost">รวมต้นทุน <span class="sort-ind" data-col="totalCost"></span></th>
               <th style="text-align: center;">จัดการ</th>
@@ -1297,9 +1312,24 @@
         renderAll();
       });
 
+      // Returns quotes sorted by their effective price (after any discount is applied)
       function getQuotesForItem(item) {
         const quotes = supplierQuotesMap[item.code] || [];
-        return [...quotes].sort((a, b) => a.price - b.price);
+        
+        const enrichedQuotes = quotes.map(q => {
+          const distDef = distributorsList.find(d => d.name.toLowerCase().trim() === q.company.toLowerCase().trim());
+          const discountPercent = distDef ? distDef.discountPercent : 0;
+          const discountedPrice = discountPercent > 0 ? q.price * (1 - discountPercent / 100) : q.price;
+          return {
+            company: q.company,
+            price: q.price, // Base price
+            discountPercent: discountPercent,
+            effectivePrice: discountedPrice
+          };
+        });
+
+        // Sort by effective price ascending
+        return enrichedQuotes.sort((a, b) => a.effectivePrice - b.effectivePrice);
       }
 
       // --- Dynamic Calculation & Aggregations ---
@@ -1308,7 +1338,7 @@
         const tiedItemsList = [];
 
         const enrichedItems = products.map(item => {
-          const quotes = getQuotesForItem(item);
+          const quotes = getQuotesForItem(item); // Already sorted by effectivePrice
           let bestQuote = null;
           let sortedQuotes = [];
 
@@ -1320,45 +1350,98 @@
           let bestCost = null;
           let totalCost = null;
           let isTied = false;
+          let hasAppliedDiscountTie = false;
           let tiedCompanies = [];
           
           const isOrdered = orderedProductCodes.includes(item.code);
 
           if (sortedQuotes.length > 0) {
-            const lowestPrice = sortedQuotes[0].price;
-            const tiedQuotes = sortedQuotes.filter(q => q.price === lowestPrice);
+            const lowestEffectivePrice = sortedQuotes[0].effectivePrice;
+            
+            // Find any quote that matches the lowest effective price
+            const tiedQuotes = sortedQuotes.filter(q => Math.abs(q.effectivePrice - lowestEffectivePrice) < 0.001);
+            const userSelection = selectedTiedSuppliersMap[item.code];
 
-            // Tie-Breaking condition (and only if needs ordering and not marked as ordered yet)
+            // 1. Tie: Multiple suppliers share the lowest effective price
+            // 2. Discounted price is lower than the base price (of the selected winner or any quote)
+            const winnerCandidate = tiedQuotes[0];
+            const isWinnerDiscounted = winnerCandidate.discountPercent > 0;
+
             if (tiedQuotes.length >= 2 && orderQty > 0 && !isOrdered) {
               isTied = true;
               tiedCompanies = tiedQuotes.map(q => q.company);
 
-              const userSelection = selectedTiedSuppliersMap[item.code];
               if (userSelection && tiedCompanies.includes(userSelection)) {
                 bestQuote = tiedQuotes.find(q => q.company === userSelection);
-                bestCost = bestQuote.price;
+                bestCost = bestQuote.effectivePrice;
                 totalCost = orderQty * bestCost;
               } else {
-                // Pending tie selection
                 bestQuote = null;
-                bestCost = lowestPrice;
+                bestCost = lowestEffectivePrice;
                 totalCost = null; 
               }
+
+              const companyPrices = tiedQuotes.map(q => ({
+                company: q.company,
+                price: q.effectivePrice,
+                basePrice: q.price,
+                discountPercent: q.discountPercent
+              }));
 
               tiedItemsList.push({
                 code: item.code,
                 name: item.name,
                 orderQty: orderQty,
                 unit: item.unit,
-                price: lowestPrice,
+                price: lowestEffectivePrice,
                 companies: tiedCompanies,
-                selection: userSelection || null
+                companyPrices: companyPrices,
+                selection: userSelection || null,
+                reason: 'TIED_EFFECTIVE_PRICE'
+              });
+
+            } else if (isWinnerDiscounted && orderQty > 0 && !isOrdered) {
+              // Not tied in effective price, but the winner has a discount (discountedPrice < basePrice)
+              // To fulfill the user's second requirement: "discounted price ต่ำกว่า base price มาแสดงให้เลือกตัดสินใจ"
+              // Let's also place it in the selection pending section if the user hasn't explicitly clicked/confirmed or wants to review.
+              // To make it flexible, we display it as a choice. The user can either confirm/choose or it defaults to the winner.
+              hasAppliedDiscountTie = true;
+              tiedCompanies = sortedQuotes.map(q => q.company); // Offer all competing options
+
+              if (userSelection) {
+                bestQuote = sortedQuotes.find(q => q.company === userSelection);
+                bestCost = bestQuote.effectivePrice;
+                totalCost = orderQty * bestCost;
+              } else {
+                // If they haven't chosen, let's automatically pre-select the best option but keep it in the list for awareness
+                bestQuote = winnerCandidate;
+                bestCost = bestQuote.effectivePrice;
+                totalCost = orderQty * bestCost;
+              }
+
+              const companyPrices = sortedQuotes.map(q => ({
+                company: q.company,
+                price: q.effectivePrice,
+                basePrice: q.price,
+                discountPercent: q.discountPercent
+              }));
+
+              tiedItemsList.push({
+                code: item.code,
+                name: item.name,
+                orderQty: orderQty,
+                unit: item.unit,
+                price: lowestEffectivePrice,
+                companies: tiedCompanies,
+                companyPrices: companyPrices,
+                selection: userSelection || null,
+                reason: 'DISCOUNT_BETTER_THAN_BASE'
               });
 
             } else {
-              // No tie
+              // Standard winner selection
               bestQuote = sortedQuotes[0];
-              bestCost = bestQuote ? bestQuote.price : null;
+              bestCost = bestQuote ? bestQuote.effectivePrice : null;
               totalCost = bestCost !== null ? orderQty * bestCost : null;
             }
           }
@@ -1367,7 +1450,7 @@
           let savedAmount = 0;
           if (sortedQuotes.length > 1 && orderQty > 0 && bestQuote && !isOrdered) {
             const worstQuote = sortedQuotes[sortedQuotes.length - 1];
-            savedAmount = orderQty * Math.max(0, worstQuote.price - bestQuote.price);
+            savedAmount = orderQty * Math.max(0, worstQuote.effectivePrice - bestQuote.effectivePrice);
           }
 
           // Accumulate orders for the winner (ignore if already ordered)
@@ -1386,7 +1469,7 @@
               productName: item.name,
               orderQty: orderQty,
               unit: item.unit,
-              price: bestQuote.price,
+              price: bestQuote.effectivePrice,
               total: totalCost,
               saved: savedAmount
             });
@@ -1400,7 +1483,7 @@
             bestQuote,
             bestCost,
             totalCost,
-            isTied,
+            isTied: isTied || hasAppliedDiscountTie,
             tiedCompanies,
             isOrdered
           };
@@ -1498,7 +1581,7 @@
                     <tr>
                       <th>รายการเวชภัณฑ์</th>
                       <th class="num" style="width: 140px;">จำนวนสั่งจริง</th>
-                      <th class="num">ราคาต่ำสุด/หน่วย</th>
+                      <th class="num">ราคาหลังหักส่วนลด/หน่วย</th>
                       <th class="num">รวม (บาท)</th>
                       <th>การประหยัดต้นทุน</th>
                     </tr>
@@ -1518,8 +1601,8 @@
         if (tiedItems.length === 0) {
           container.innerHTML = `
             <div class="empty-state">
-              <strong>ไม่มีรายการสินค้าที่ราคาเสนอเท่ากัน</strong>
-              ทุกรายการที่มีข้อมูลราคา มีบริษัทเสนอราคาต่ำที่สุดเป็นเอกฉันท์ชัดเจน
+              <strong>ไม่มีรายการสินค้าที่ต้องตัดสินใจเลือก</strong>
+              ทุกรายการที่มีข้อมูลราคามีบริษัทจัดซื้อที่คุ้มค่าที่สุดอย่างชัดเจนแล้ว
             </div>
           `;
           return;
@@ -1527,6 +1610,9 @@
 
         const rowsHtml = tiedItems.map(entry => {
           let compBadges = '';
+          const reasonText = entry.reason === 'TIED_EFFECTIVE_PRICE' 
+            ? '<span class="pill-badge" style="background:#fef3c7; color:#d97706; font-size:11px;">ราคาเท่ากัน</span>'
+            : '<span class="pill-badge" style="background:#dbeafe; color:#2563eb; font-size:11px;">ราคาลดพิเศษดีกว่า</span>';
           
           if (entry.selection) {
             compBadges = `
@@ -1551,14 +1637,32 @@
             `;
           }
 
+          let pricesListHtml = '';
+          if (entry.companyPrices && entry.companyPrices.length > 0) {
+            pricesListHtml = entry.companyPrices.map(cp => {
+              const basePriceInfo = cp.discountPercent > 0 ? `<span style="font-size: 11px; text-decoration: line-through; color: var(--muted); margin-left: 4px;">(${formatCurrency(cp.basePrice)} ฿)</span>` : '';
+              return `
+                <div style="font-size: 12.5px; margin-bottom: 2px; text-align: left;">
+                  <span style="font-weight: 600;">${escapeHtml(cp.company)}:</span>
+                  <span style="color: var(--success); font-weight: 700;">${formatCurrency(cp.price)} ฿</span>${basePriceInfo}
+                </div>
+              `;
+            }).join('');
+          } else {
+            pricesListHtml = `<div style="color: var(--success); font-weight:700; font-size:14px; text-align: right;">${formatCurrency(entry.price)} ฿</div>`;
+          }
+
           return `
             <tr>
               <td>
                 <div class="clickable-cell" data-edit-code="${escapeHtml(entry.code)}" style="font-weight:700; color: var(--ink);" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">${escapeHtml(entry.name)}</div>
                 <div class="code-text clickable-cell" data-edit-code="${escapeHtml(entry.code)}" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">${escapeHtml(entry.code)}</div>
+                <div style="margin-top: 4px;">${reasonText}</div>
               </td>
               <td class="num"><strong>${formatNumber(entry.orderQty)}</strong> ${escapeHtml(entry.unit)}</td>
-              <td class="num" style="color: var(--success); font-weight:700; font-size:14px;">${formatCurrency(entry.price)} ฿</td>
+              <td style="vertical-align: middle;">
+                ${pricesListHtml}
+              </td>
               <td>
                 ${compBadges}
               </td>
@@ -1573,8 +1677,8 @@
                 <tr>
                   <th>รายการสินค้า</th>
                   <th class="num">ต้องสั่ง</th>
-                  <th class="num">ราคาต่ำสุด</th>
-                  <th>บริษัทผู้เสนอราคาเท่ากัน (คลิกเลือกเพื่อจัดส่งเข้า Recommended Orders)</th>
+                  <th class="num">ราคาต่ำสุดสุทธิ</th>
+                  <th>บริษัทผู้เสนอราคา (คลิกเลือกเพื่อยืนยันส่งข้อมูลเข้า Recommended Orders)</th>
                 </tr>
               </thead>
               <tbody>
@@ -1681,10 +1785,17 @@
           if (row.quotes.length > 0) {
             const quotesHtml = row.quotes.map((q, idx) => {
               const isWinner = row.bestQuote ? (q.company === row.bestQuote.company) : false;
+              const discountText = q.discountPercent > 0 
+                ? `<span class="comp-discount-info">ลดพิเศษ ${q.discountPercent}% (สุทธิ: ${formatCurrency(q.effectivePrice)} ฿)</span>`
+                : '';
+              
               return `
                 <div class="comparison-item ${isWinner ? 'cheapest' : ''}">
-                  <span>${isWinner ? '🏆 ' : ''}${escapeHtml(q.company)}</span>
-                  <span><strong>${formatCurrency(q.price)} ฿</strong></span>
+                  <div class="comp-names-row">
+                    <span>${isWinner ? '🏆 ' : ''}${escapeHtml(q.company)}</span>
+                    <span><strong>${formatCurrency(q.price)} ฿</strong></span>
+                  </div>
+                  ${discountText}
                 </div>
               `;
             }).join('');
@@ -1694,7 +1805,7 @@
               if (row.bestQuote) {
                 statusBanner = `<div style="font-size:12px; color:var(--success); font-weight:700; margin-bottom: 2px;">✓ เลือกสั่งจาก: ${escapeHtml(row.bestQuote.company)}</div>`;
               } else {
-                statusBanner = `<div style="font-size:12px; color:var(--warning); font-weight:700; margin-bottom: 2px;">⚖️ เสนอเท่ากัน (คลิกเลือกด้านบน)</div>`;
+                statusBanner = `<div style="font-size:12px; color:var(--warning); font-weight:700; margin-bottom: 2px;">⚖️ รอตัดสินใจผู้จัดจำหน่าย (ดูด้านบน)</div>`;
               }
             }
             supplierComparisonsHtml = `${statusBanner}<div class="comparison-container">${quotesHtml}</div>`;
