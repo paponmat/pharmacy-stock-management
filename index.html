@@ -1117,7 +1117,7 @@
       function formatCurrency(n) {
         return Number(n).toLocaleString('th-TH', {
           minimumFractionDigits: 2,
-          maximumFractionDigits: 2
+          maximumFractionDigits: 3
         });
       }
 
@@ -1469,12 +1469,10 @@
               productName: item.name,
               orderQty: orderQty,
               unit: item.unit,
-              price: bestQuote.effectivePrice,
-              total: totalCost,
+              basePrice: bestQuote.price,
+              effectivePrice: bestQuote.effectivePrice,
               saved: savedAmount
             });
-            supplierGroups[sName].totalPurchase += totalCost;
-            supplierGroups[sName].totalSaved += savedAmount;
           }
 
           return {
@@ -1493,9 +1491,27 @@
       }
 
       function renderSupplierPlans(supplierGroups) {
-        const groups = Object.values(supplierGroups).sort((a, b) => b.totalPurchase - a.totalPurchase);
+        // Prepare groups and calculate dynamic totals depending on discount thresholds
+        const calculatedGroups = Object.values(supplierGroups).map(g => {
+          const distDef = distributorsList.find(d => d.name.toLowerCase().trim() === g.company.toLowerCase().trim());
+          const minPurchase = distDef ? distDef.minPurchase : 0;
+          const discountPercent = distDef ? distDef.discountPercent : 0;
+          
+          const totalBasePurchase = g.items.reduce((sum, item) => sum + (item.basePrice * item.orderQty), 0);
+          const isDiscountApplied = discountPercent > 0 && (minPurchase === 0 || totalBasePurchase >= minPurchase);
+          const finalTotal = isDiscountApplied ? totalBasePurchase * (1 - discountPercent / 100) : totalBasePurchase;
+          
+          return {
+            ...g,
+            totalBasePurchase,
+            finalTotal,
+            isDiscountApplied,
+            minPurchase,
+            discountPercent
+          };
+        }).sort((a, b) => b.finalTotal - a.finalTotal);
 
-        if (groups.length === 0) {
+        if (calculatedGroups.length === 0) {
           supplierRecommendationsContainer.innerHTML = `
             <div class="empty-state">
               <strong>ยังไม่มีแผนคำแนะนำเปรียบเทียบราคา</strong>
@@ -1505,67 +1521,66 @@
           return;
         }
 
-        supplierRecommendationsContainer.innerHTML = groups.map(g => {
-          const itemRows = g.items.map(entry => `
-            <tr>
-              <td>
-                <div class="clickable-cell" data-edit-code="${escapeHtml(entry.productCode)}" style="font-weight:600; color: var(--ink);" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">${escapeHtml(entry.productName)}</div>
-                <div class="code-text clickable-cell" data-edit-code="${escapeHtml(entry.productCode)}" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">${escapeHtml(entry.productCode)}</div>
-              </td>
-              <td class="num" style="white-space: nowrap;">
-                <input
-                  type="number"
-                  class="rec-actual-qty"
-                  data-code="${escapeHtml(entry.productCode)}"
-                  min="0"
-                  style="width: 75px; text-align: right; padding: 4px; border: 1px solid var(--border-strong); border-radius: 4px;"
-                  value="${entry.orderQty}"
-                >
-                ${escapeHtml(entry.unit)}
-              </td>
-              <td class="num">${formatCurrency(entry.price)}</td>
-              <td class="num"><strong>${formatCurrency(entry.total)}</strong></td>
-              <td>
-                ${entry.saved > 0 ? `<span class="pill-badge saving-pill">ประหยัด ${formatCurrency(entry.saved)} ฿</span>` : `<span style="font-size:12px; color: var(--muted);">ราคาดีที่สุด</span>`}
-              </td>
-            </tr>
-          `).join('');
+        supplierRecommendationsContainer.innerHTML = calculatedGroups.map(g => {
+          const itemRows = g.items.map(entry => {
+            // Determine active unit price based on conditional discount activation
+            const currentPrice = g.isDiscountApplied ? entry.effectivePrice : entry.basePrice;
+            const currentTotal = entry.orderQty * currentPrice;
 
-          // Calculate distributor discount rules dynamically
-          const distDef = distributorsList.find(d => d.name.toLowerCase().trim() === g.company.toLowerCase().trim());
-          const minPurchase = distDef ? distDef.minPurchase : 0;
-          const discountPercent = distDef ? distDef.discountPercent : 0;
-          
-          let discountAmount = 0;
-          let netTotal = g.totalPurchase;
-          let isDiscountApplied = false;
+            return `
+              <tr>
+                <td>
+                  <div class="clickable-cell" data-edit-code="${escapeHtml(entry.productCode)}" style="font-weight:600; color: var(--ink);" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">${escapeHtml(entry.productName)}</div>
+                  <div class="code-text clickable-cell" data-edit-code="${escapeHtml(entry.productCode)}" title="คลิกเพื่อกรอก/แก้ไขราคายานี้">${escapeHtml(entry.productCode)}</div>
+                </td>
+                <td class="num" style="white-space: nowrap;">
+                  <input
+                    type="number"
+                    class="rec-actual-qty"
+                    data-code="${escapeHtml(entry.productCode)}"
+                    min="0"
+                    style="width: 75px; text-align: right; padding: 4px; border: 1px solid var(--border-strong); border-radius: 4px;"
+                    value="${entry.orderQty}"
+                  >
+                  ${escapeHtml(entry.unit)}
+                </td>
+                <td class="num">${formatCurrency(currentPrice)} ฿</td>
+                <td class="num"><strong>${formatCurrency(currentTotal)} ฿</strong></td>
+                <td>
+                  ${entry.saved > 0 ? `<span class="pill-badge saving-pill">ประหยัด ${formatCurrency(entry.saved)} ฿</span>` : `<span style="font-size:12px; color: var(--muted);">ราคาดีที่สุด</span>`}
+                </td>
+              </tr>
+            `;
+          }).join('');
+
           let discountPromoHtml = '';
 
-          if (minPurchase > 0 && discountPercent > 0) {
-            if (g.totalPurchase >= minPurchase) {
-              isDiscountApplied = true;
-              discountAmount = g.totalPurchase * (discountPercent / 100);
-              netTotal = g.totalPurchase - discountAmount;
+          if (g.discountPercent > 0) {
+            if (g.isDiscountApplied) {
+              const discountAmount = g.totalBasePurchase * (g.discountPercent / 100);
               discountPromoHtml = `
                 <div style="text-align: right; line-height: 1.3;">
-                  <div style="font-size:12px; text-decoration:line-through; color:var(--muted);">ยอดก่อนหักส่วนลด: ${formatCurrency(g.totalPurchase)} ฿</div>
-                  <div style="font-size:12px; color:var(--success); font-weight:700;">🎉 ลดเพิ่มพิเศษ ${discountPercent}% (ซื้อครบ ${formatNumber(minPurchase)} ฿) -${formatCurrency(discountAmount)} ฿</div>
-                  <span style="font-size: 13.5px; font-weight:700;">ยอดสั่งซื้อสุทธิ: <strong style="color:var(--brand); font-size:15px;">${formatCurrency(netTotal)} บาท</strong></span>
+                  <div style="font-size:12px; text-decoration:line-through; color:var(--muted);">ยอดก่อนหักส่วนลด: ${formatCurrency(g.totalBasePurchase)} ฿</div>
+                  <div style="font-size:12px; color:var(--success); font-weight:700;">🎉 ได้รับส่วนลดแล้ว ${g.discountPercent}% (ยอดซื้อ ${formatCurrency(g.totalBasePurchase)} ฿ ครบขั้นต่ำ ${formatNumber(g.minPurchase)} ฿) -${formatCurrency(discountAmount)} ฿</div>
+                  <span style="font-size: 13.5px; font-weight:700;">ยอดสั่งซื้อสุทธิ: <strong style="color:var(--brand); font-size:15px;">${formatCurrency(g.finalTotal)} บาท</strong></span>
                 </div>
               `;
             } else {
               discountPromoHtml = `
                 <div style="text-align: right; line-height: 1.3;">
-                  <div style="font-size:11.5px; color:var(--muted); font-weight:500;">ซื้อเพิ่มอีก <strong style="color:var(--brand);">${formatCurrency(minPurchase - g.totalPurchase)} ฿</strong> เพื่อได้ลดเพิ่ม ${discountPercent}%</div>
-                  <span style="font-size: 13.5px; font-weight:700;">ยอดสั่งซื้อรวม: <strong style="color:var(--brand);">${formatCurrency(g.totalPurchase)} บาท</strong></span>
+                  <div style="font-size:11.5px; color:var(--danger); font-weight:600;">⚠️ แสดงราคาฐาน (ยอดสั่งรวม ${formatCurrency(g.totalBasePurchase)} ฿ ยังไม่ถึงขั้นต่ำ ${formatNumber(g.minPurchase)} ฿ สำหรับลด ${g.discountPercent}%)</div>
+                  <div style="font-size:11.5px; color:var(--muted); font-weight:500;">ต้องการอีก <strong style="color:var(--brand);">${formatCurrency(g.minPurchase - g.totalBasePurchase)} ฿</strong> เพื่อปลดล็อกส่วนลด</div>
+                  <span style="font-size: 13.5px; font-weight:700;">ยอดสั่งซื้อรวม: <strong style="color:var(--brand);">${formatCurrency(g.finalTotal)} บาท</strong></span>
                 </div>
               `;
             }
           } else {
             discountPromoHtml = `
-              <span>ยอดสั่งซื้อรวม: <strong style="color:var(--brand);">${formatCurrency(g.totalPurchase)} บาท</strong></span>
+              <span>ยอดสั่งซื้อรวม: <strong style="color:var(--brand);">${formatCurrency(g.finalTotal)} บาท</strong></span>
             `;
           }
+
+          const priceHeaderLabel = g.isDiscountApplied ? 'ราคาหลังหักส่วนลด/หน่วย' : 'ราคาฐาน (Base Price)/หน่วย';
 
           return `
             <div class="supplier-summary-card">
@@ -1581,7 +1596,7 @@
                     <tr>
                       <th>รายการเวชภัณฑ์</th>
                       <th class="num" style="width: 140px;">จำนวนสั่งจริง</th>
-                      <th class="num">ราคาหลังหักส่วนลด/หน่วย</th>
+                      <th class="num">${priceHeaderLabel}</th>
                       <th class="num">รวม (บาท)</th>
                       <th>การประหยัดต้นทุน</th>
                     </tr>
